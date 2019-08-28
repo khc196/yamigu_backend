@@ -36,16 +36,16 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, id, password):
+    def create_superuser(self, name, password):
         user = self.create_user(
-            name='root'+str(id),
+            name=name,
             gender=1,
             phone='010-0000-0000',
             belong='yamigu',
             department='development',
             age=99,
-            nickname='root'+str(id),
-            email='root'+str(id)+'@yamigu.com',
+            nickname=name,
+            email=name+'@yamigu.com',
             password=password,
         )
         user.is_admin = True
@@ -62,15 +62,15 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=20, blank=False)
-    gender = models.IntegerField(blank=False)
-    nickname = models.CharField(max_length=20, blank=True)
+    name = models.CharField(max_length=20, blank=False, unique=True)
+    gender = models.IntegerField(blank=False, null=True)
+    nickname = models.CharField(max_length=20, blank=True, null=True)
     phone_regex = RegexValidator(regex=r'd{3}[- ]?\d{4}[- ]?\d{4}', message="Phone number is invalid.")
-    phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=14, unique=True)
-    belong = models.CharField(blank=False, max_length=20)
-    department = models.CharField(blank=False, max_length=20)
-    age = models.IntegerField(blank=False)
-    email = models.EmailField(max_length=70, blank=True, unique=True)
+    phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=14, null=True)
+    belong = models.CharField(blank=False, max_length=20, null=True)
+    department = models.CharField(blank=False, max_length=20, null=True)
+    age = models.IntegerField(blank=False, null=True)
+    email = models.EmailField(max_length=70, blank=True)
     is_certified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -79,4 +79,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     token = Token
     objects = UserManager()
 
-    USERNAME_FIELD = 'id'
+    USERNAME_FIELD = 'name'

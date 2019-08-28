@@ -63,7 +63,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 ACCOUNT_AUTHENTICATION_METHOD = 'id'
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'name'
 ACCOUNT_USERNAME_REQUIRED = False
 AUTH_USER_MODEL = 'authorization.User'
 
