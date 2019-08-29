@@ -7,9 +7,7 @@ from django.utils.translation import gettext as _
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
-        if not name:
-            raise ValueError('Users must have a name')
+    def create_user(self, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not gender:
             raise ValueError('Users must have a gender')
         if not phone:
@@ -22,7 +20,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Users must have an age')
 
         user = self.model(
-            name=name,
+            real_name=real_name,
             gender=gender,
             phone=phone,
             is_student=is_student,
@@ -37,36 +35,38 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, name, password):
+    def create_superuser(self, id, password):
         user = self.create_user(
-            name=name,
+            real_name="MANAGER"+str(id),
             gender=1,
             phone='010-0000-0000',
             belong='yamigu',
             department='development',
+            is_student = True,
             age=99,
-            nickname=name,
-            email=name+'@yamigu.com',
+            nickname='manager'+str(id),
+            email='manager'+str(id)+'@yamigu.com',
             password=password,
         )
         user.is_admin = True
-        user.is_staff = True
+        user.is_staff = True    
         user.is_superuser = True
         user.save(using=self._db)
         return user
 
     def create_kakao_user(self, user_pk, extra_data):
         user = User.objects.get(pk=user_pk)
-        # user.name = extra_data['properties']['nickname']
+        
+        user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
         user.save(using=self._db)
         return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=20, blank=False, unique=True)
-    real_name = models.CharField(max_length=20, blank=False)
+    name = models.CharField(max_length=20, null=True, unique=True)
+    real_name = models.CharField(max_length=20, null=True)
     gender = models.IntegerField(blank=False, null=True)
-    nickname = models.CharField(max_length=20, blank=True, null=True)
+    nickname = models.CharField(max_length=20, blank=True, null=True, unique=True)
     phone_regex = RegexValidator(regex=r'\d{3}[-]?\d{4}[-]?\d{4}', message="Phone number is invalid.")
     phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=14, null=True)
     is_student = models.BooleanField(default=True)
@@ -83,3 +83,5 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'name'
+    def __str__(self):
+        return str(self.id)

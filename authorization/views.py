@@ -35,6 +35,7 @@ class SignUpView(APIView):
     def post(Self, request, *args, **kwargs):
         user = User.objects.select_related().get(id=request.user.id)
         user.nickname = request.data['nickname']
+        user.real_name = request.data['real_name']
         user.gender = request.data['gender']
         user.phone = request.data['phone']
         user.is_student = True if request.data['is_student'] == 'true' else False
