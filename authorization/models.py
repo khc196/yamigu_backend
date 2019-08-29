@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, gender, phone, belong, department, age, nickname=None, email=None, password=None):
+    def create_user(self, name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not name:
             raise ValueError('Users must have a name')
         if not gender:
@@ -25,6 +25,7 @@ class UserManager(BaseUserManager):
             name=name,
             gender=gender,
             phone=phone,
+            is_student=is_student,
             belong=belong,
             department=department,
             age=age,
@@ -63,10 +64,12 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=20, blank=False, unique=True)
+    real_name = models.CharField(max_length=20, blank=False)
     gender = models.IntegerField(blank=False, null=True)
     nickname = models.CharField(max_length=20, blank=True, null=True)
-    phone_regex = RegexValidator(regex=r'd{3}[- ]?\d{4}[- ]?\d{4}', message="Phone number is invalid.")
+    phone_regex = RegexValidator(regex=r'\d{3}[-]?\d{4}[-]?\d{4}', message="Phone number is invalid.")
     phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=14, null=True)
+    is_student = models.BooleanField(default=True)
     belong = models.CharField(blank=False, max_length=20, null=True)
     department = models.CharField(blank=False, max_length=20, null=True)
     age = models.IntegerField(blank=False, null=True)
