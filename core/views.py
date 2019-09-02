@@ -10,8 +10,7 @@ from rest_framework.response import Response
 from .serializers import *
 from .models import *
 from authorization.models import User
-import datetime
-
+from datetime import datetime
 class MeetingTypeView(APIView):
     def get(self, request, *args, **kwargs):
         queryset = MeetingType.objects.all()
@@ -54,6 +53,16 @@ class MeetingListView(APIView):
                 return self.get_paginated_response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
+class MyMeetingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = Meeting.objects.filter(openby=request.user.id)
+            serializer = MeetingSerializer(queryset, many=True)
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
 
 
 class MeetingDetailView(APIView):
@@ -66,31 +75,35 @@ class MeetingDetailView(APIView):
 
 class MeetingCreateView(APIView):
     permission_classes = [IsAuthenticated]
-
-    def get_meetingtype_object(self, id):
+    def get_date_object(self, date_string):
         try:
-            return MeetingType.objects.get(id=id)
+            date_string = str(datetime.now().year) + " " + date_string 
+            date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+            return date
         except:
             raise Http404
     def post(self, request, *args, **kwargs):
-        type_id = kwargs['category']
-        mettingtype = self.get_meetingtype_object(type_id)
         data = {
-                'meeting_type': mettingtype.id,
                 'openby': request.user.id,
-                'date': request.data['date'],
-                'place': request.data['place'],
+                'meeting_type': request.data['meeting_type'],
+                'date': self.get_date_object(request.data['date']),
+                'place_type': request.data['place'],
                 'appeal': request.data['appeal'],
+                'man': None,
+                'woman': None,
+                'place': None,
+                'rating': None,
+                'is_matched': False,
             }
-        if(request.user.gender == 0):
+        if(request.user.gender == 1):
             data['man'] = request.user.id
-        elif(request.user.gender == 1):
+        elif(request.user.gender == 2):
             data['woman'] = request.user.id
-
+        print(data)
         serializer = MeetingSerializer(data=data)
-
-        if serializer.valid():
+        if serializer.is_valid():
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -37,6 +37,7 @@ class Meeting(models.Model):
     woman = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_woman")
     openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_openby")
     date = models.DateField(null=False, blank=False)
+    place_type = models.ForeignKey(PlaceType, on_delete=models.SET_NULL, null=True)
     place = models.ForeignKey(Place, on_delete=models.SET_NULL, null=True)
     appeal = models.TextField()
     rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, null=True)

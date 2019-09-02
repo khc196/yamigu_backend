@@ -21,7 +21,7 @@ class RatingSerializer(ModelSerializer):
 class MeetingSerializer(ModelSerializer):
     class Meta:
         model = Meeting
-        fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place", "appeal", "rating", "is_matched", "created_at")
+        fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place_type", "place", "appeal", "rating", "is_matched", "created_at")
 
 
 
