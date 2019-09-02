@@ -19,9 +19,10 @@ class RatingSerializer(ModelSerializer):
         model = Rating
         fields = ("id", "visual", "fun", "manner", "created_at")
 class MeetingSerializer(ModelSerializer):
+    place_type_name = CharField(source='place_type.name', read_only=True)
     class Meta:
         model = Meeting
-        fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place_type", "place", "appeal", "rating", "is_matched", "created_at")
+        fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place_type_name", "place", "appeal", "rating", "is_matched", "created_at")
 
 
 

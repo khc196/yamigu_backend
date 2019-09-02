@@ -58,7 +58,7 @@ class MyMeetingListView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            queryset = Meeting.objects.filter(openby=request.user.id)
+            queryset = Meeting.objects.prefetch_related('place_type').filter(openby=request.user.id)
             serializer = MeetingSerializer(queryset, many=True)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
