@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
+    def create_user(self, name, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not gender:
             raise ValueError('Users must have a gender')
         if not phone:
@@ -20,6 +20,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Users must have an age')
 
         user = self.model(
+            name=name,
             real_name=real_name,
             gender=gender,
             phone=phone,
@@ -35,17 +36,18 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, id, password):
+    def create_superuser(self, name, password):
         user = self.create_user(
-            real_name="MANAGER"+str(id),
+            name=name,
+            real_name="MANAGER-"+name,
             gender=1,
             phone='010-0000-0000',
             belong='yamigu',
             department='development',
             is_student = True,
             age=99,
-            nickname='manager'+str(id),
-            email='manager'+str(id)+'@yamigu.com',
+            nickname='manager_'+name,
+            email='manager_'+name+'@yamigu.com',
             password=password,
         )
         user.is_admin = True
