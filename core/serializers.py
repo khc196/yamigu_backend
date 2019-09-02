@@ -23,6 +23,12 @@ class MeetingSerializer(ModelSerializer):
     class Meta:
         model = Meeting
         fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place_type_name", "place", "appeal", "rating", "is_matched", "created_at")
+class MeetingCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Meeting
+        fields = ("id", "meeting_type", "man", "woman", "openby", "date", "place_type", "appeal", "rating", "is_matched", "created_at")
+
+
 
 
 

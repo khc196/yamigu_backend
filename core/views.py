@@ -58,8 +58,9 @@ class MyMeetingListView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            queryset = Meeting.objects.prefetch_related('place_type').filter(openby=request.user.id)
+            queryset = Meeting.objects.filter(openby=request.user.id)
             serializer = MeetingSerializer(queryset, many=True)
+            print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
@@ -100,7 +101,7 @@ class MeetingCreateView(APIView):
         elif(request.user.gender == 2):
             data['woman'] = request.user.id
         print(data)
-        serializer = MeetingSerializer(data=data)
+        serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_201_CREATED)
