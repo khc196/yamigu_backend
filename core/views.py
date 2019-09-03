@@ -75,7 +75,7 @@ class MyMeetingListView(APIView):
         try:
             queryset = Meeting.objects.filter(openby=request.user.id)
             serializer = MeetingSerializer(queryset, many=True)
-            print(serializer.data)
+            #print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
@@ -115,11 +115,10 @@ class MeetingCreateView(APIView):
             data['man'] = request.user.id
         elif(request.user.gender == 2):
             data['woman'] = request.user.id
-        print(data)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
+        #print(serializer.errors)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
