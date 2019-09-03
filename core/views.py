@@ -11,6 +11,7 @@ from .serializers import *
 from .models import *
 from authorization.models import User
 from datetime import datetime
+from .utils.pagination import MyPaginationMixin
 class MeetingTypeView(APIView):
     def get(self, request, *args, **kwargs):
         queryset = MeetingType.objects.all()
@@ -48,6 +49,20 @@ class MeetingListView(APIView):
             queryset = Meeting.objects.prefetch_related('openby').prefetch_related('rating').prefetch_related('place').filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
             page = self.paginate_queryset(queryset)
 
+            if page is not None:
+                serializer = self.serializer_class(page, many=True)
+                return self.get_paginated_response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+class WaitingMeetingListView(APIView, MyPaginationMixin):
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+    serializer_class = MeetingSerializer
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            selected_dates = request.GET.getlist('date')
+            queryset = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
+            page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
                 return self.get_paginated_response(serializer.data)
