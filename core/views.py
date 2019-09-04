@@ -1,7 +1,7 @@
 from functools import reduce
 
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
@@ -68,6 +68,21 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
                 return self.get_paginated_response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+class WaitingMeetingListNumberView(APIView):
+    serializer_class = MeetingSerializer
+    def get(self, request, *args, **kwargs):
+        try:
+            selected_dates = request.GET.getlist('date')
+            selected_types = request.GET.getlist('type')
+            selected_places = request.GET.getlist('place')
+            if(len(selected_dates) == 0):
+                raise Http404
+            count = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(date=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(date=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id)).count()
+            return JsonResponse({
+                'count' : count,
+            }, json_dumps_params = {'ensure_ascii': True})
         except Meeting.DoesNotExist as e:
             raise Http404
 class MyMeetingListView(APIView):
