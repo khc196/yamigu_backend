@@ -61,6 +61,8 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
     def get(self, request, *args, **kwargs):
         try:
             selected_dates = request.GET.getlist('date')
+            if(len(selected_dates) == 0):
+                raise Http404
             queryset = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
             page = self.paginate_queryset(queryset)
             if page is not None:
