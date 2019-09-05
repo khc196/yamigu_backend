@@ -94,6 +94,7 @@ class WaitingMeetingListNumberView(APIView):
             if(maximum_age < 11):
 	            filtered_data = filtered_data.filter(Q(openby__age__lt=maximum_age+20))
             count = filtered_data.count()
+
             return JsonResponse({
                 'count' : count,
             }, json_dumps_params = {'ensure_ascii': True})
