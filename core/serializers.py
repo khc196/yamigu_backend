@@ -24,9 +24,10 @@ class MeetingSerializer(ModelSerializer):
     openby_age = CharField(source='openby.age', read_only=True)
     openby_belong = CharField(source='openby.belong', read_only=True)
     openby_department = CharField(source='openby.department', read_only=True)
+    openby_profile = CharField(source='openby.image', read_only=True)
     class Meta:
         model = Meeting
-        fields = ("id", "meeting_type", "man", "woman", "openby", "openby_nickname", "openby_age", "openby_belong", "openby_department", "date", "place_type_name", "place", "appeal", "rating", "is_matched", "created_at")
+        fields = ("id", "meeting_type", "man", "woman", "openby", "openby_nickname", "openby_age", "openby_belong", "openby_department", "openby_profile", "date", "place_type_name", "place", "appeal", "rating", "is_matched", "created_at")
 class MeetingCreateSerializer(ModelSerializer):
     class Meta:
         model = Meeting
