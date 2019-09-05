@@ -60,6 +60,7 @@ class UserManager(BaseUserManager):
         user = User.objects.get(pk=user_pk)
         
         user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
+        user.image = extra_data['properties']['profile_image']
         user.save(using=self._db)
         return user
 
@@ -76,6 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     department = models.CharField(blank=False, max_length=20, null=True)
     age = models.IntegerField(blank=False, null=True)
     email = models.EmailField(max_length=70, blank=True)
+    image = models.CharField(max_length=200,blank=True)
     is_certified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

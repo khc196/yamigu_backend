@@ -7,5 +7,6 @@ api_urlpattern = [
     path('meetings/<int:id>/', MeetingDetailView.as_view()),
     path('meetings/create/', MeetingCreateView.as_view()),
     path('meetings/my/', MyMeetingListView.as_view()),
-    path('meetings/waiting/', WaitingMeetingListView.as_view())
+    path('meetings/waiting/', WaitingMeetingListView.as_view()),
+    path('meetings/waiting/count/', WaitingMeetingListNumberView.as_view()),
 ]

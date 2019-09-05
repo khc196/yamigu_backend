@@ -1,7 +1,7 @@
 from functools import reduce
 
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
@@ -61,13 +61,42 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
     def get(self, request, *args, **kwargs):
         try:
             selected_dates = request.GET.getlist('date')
+            selected_types = request.GET.getlist('type')
+            selected_places = request.GET.getlist('place')
+            minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
+            maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
+            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            filtered_data = filtered_data.filter(Q(openby__age__gt=minimum_age+20))
+            if(maximum_age < 11):
+	            filtered_data = filtered_data.filter(Q(openby__age__lt=maximum_age+20))
+
             if(len(selected_dates) == 0):
                 raise Http404
-            queryset = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
-            page = self.paginate_queryset(queryset)
+            page = self.paginate_queryset(filtered_data)
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
                 return self.get_paginated_response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+class WaitingMeetingListNumberView(APIView):
+    serializer_class = MeetingSerializer
+    def get(self, request, *args, **kwargs):
+        try:
+            selected_dates = request.GET.getlist('date')
+            selected_types = request.GET.getlist('type')
+            selected_places = request.GET.getlist('place')
+            minimum_age = int(request.GET.get('minimum_age'))
+            maximum_age = int(request.GET.get('maximum_age'))
+            if(len(selected_dates) == 0):
+                raise Http404
+            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            filtered_data = filtered_data.filter(Q(openby__age__gt=minimum_age+20))
+            if(maximum_age < 11):
+	            filtered_data = filtered_data.filter(Q(openby__age__lt=maximum_age+20))
+            count = filtered_data.count()
+            return JsonResponse({
+                'count' : count,
+            }, json_dumps_params = {'ensure_ascii': True})
         except Meeting.DoesNotExist as e:
             raise Http404
 class MyMeetingListView(APIView):
