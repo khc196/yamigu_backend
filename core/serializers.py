@@ -33,6 +33,8 @@ class MeetingCreateSerializer(ModelSerializer):
         model = Meeting
         fields = ("id", "meeting_type", "openby", "date", "place_type", "appeal", "rating", "is_matched", "created_at")
 class MatchRequestSerializer(ModelSerializer):
+    sender = MeetingSerializer()
+    receiver = MeetingSerializer()
     class Meta:
         model = MatchRequest
         fields = ("id", "sender", "receiver", "created_at")
