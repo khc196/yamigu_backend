@@ -105,7 +105,8 @@ class MyMeetingListView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            queryset = Meeting.objects.filter(openby=request.user.id)
+            now=datetime.today()
+            queryset = Meeting.objects.filter(openby=request.user.id).filter(Q(date__gte=now))
             serializer = MeetingSerializer(queryset, many=True)
             #print(serializer.data)
             return Response(serializer.data)
@@ -137,16 +138,10 @@ class MeetingCreateView(APIView):
                 'date': self.get_date_object(request.data['date']),
                 'place_type': request.data['place'],
                 'appeal': request.data['appeal'],
-                'man': None,
-                'woman': None,
                 'place': None,
                 'rating': None,
                 'is_matched': False,
             }
-        if(request.user.gender == 1):
-            data['man'] = request.user.id
-        elif(request.user.gender == 2):
-            data['woman'] = request.user.id
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
@@ -154,3 +149,39 @@ class MeetingCreateView(APIView):
         #print(serializer.errors)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MeetingRequestMatchView(APIView):
+	permission_classes = [IsAuthenticated]
+	def get_date_object(self, date_string):
+		try:
+			date_string = str(datetime.now().year) + " " + date_string 
+			date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+			return date
+		except:
+			raise Http404
+
+	def post(self, request, *args, **kwargs):
+		data = {
+                'openby': request.user.id,
+                'meeting_type': request.data['meeting_type'],
+                'date': self.get_date_object(request.data['date']),
+                'place_type': request.data['place'],
+                'appeal': request.data['appeal'],
+                'place': None,
+                'rating': None,
+                'is_matched': False,
+            }
+		serializer = MeetingCreateSerializer(data=data)
+		if serializer.is_valid():
+			meeting = serializer.save()
+			data2 = {
+                'sender': meeting.id,
+                'receiver': request.data['meeting_id'],
+                'is_selected': False
+                }
+			serializer2 = MatchRequestSerializer(data=data2)
+			if serializer2.is_valid():
+				match = serializer2.save()
+                # TODO: push notification to receiver
+				return Response(data=match.id, status=status.HTTP_201_CREATED)
+			return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

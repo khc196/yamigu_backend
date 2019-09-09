@@ -33,8 +33,6 @@ class Rating(models.Model):
 
 class Meeting(models.Model):
     meeting_type = models.ForeignKey(MeetingType, on_delete=models.SET_NULL, null=True)
-    man = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_man")
-    woman = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_woman")
     openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_openby")
     date = models.DateField(null=False, blank=False)
     place_type = models.ForeignKey(PlaceType, on_delete=models.SET_NULL, null=True, related_name="meeting_place_type")
@@ -43,8 +41,16 @@ class Meeting(models.Model):
     rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, null=True)
     is_matched = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
 class PlaceImage(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE)
     image = models.FileField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class MatchRequest(models.Model):
+    receiver = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_receiver")
+    sender = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_sender")
+    is_selected = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
