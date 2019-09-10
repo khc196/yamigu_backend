@@ -150,17 +150,23 @@ class MeetingCreateView(APIView):
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingRequestMatchView(APIView):
-	permission_classes = [IsAuthenticated]
-	def get_date_object(self, date_string):
-		try:
-			date_string = str(datetime.now().year) + " " + date_string 
-			date = datetime.strptime(date_string, "%Y %m월 %d일").date()
-			return date
-		except:
-			raise Http404
-
-	def post(self, request, *args, **kwargs):
-		data = {
+    permission = [IsAuthenticated]
+    def get_date_object(self, date_string):
+        try:
+            date_string = str(datetime.now().year) + " " + date_string 
+            date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+            return date
+        except:
+            raise Http404
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0]))
+            serializer = MatchRequestSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+    def post(self, request, *args, **kwargs):
+        data = {
                 'openby': request.user.id,
                 'meeting_type': request.data['meeting_type'],
                 'date': self.get_date_object(request.data['date']),
@@ -170,18 +176,18 @@ class MeetingRequestMatchView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
-		serializer = MeetingCreateSerializer(data=data)
-		if serializer.is_valid():
-			meeting = serializer.save()
-			data2 = {
+        serializer = MeetingCreateSerializer(data=data)
+        if serializer.is_valid():
+            meeting = serializer.save()
+            data2 = {
                 'sender': meeting.id,
                 'receiver': request.data['meeting_id'],
                 'is_selected': False
                 }
-			serializer2 = MatchRequestSerializer(data=data2)
-			if serializer2.is_valid():
-				match = serializer2.save()
+            serializer2 = MatchRequestSerializer(data=data2)
+            if serializer2.is_valid():
+                match = serializer2.save()
                 # TODO: push notification to receiver
-				return Response(data=match.id, status=status.HTTP_201_CREATED)
-			return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(data=match.id, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
