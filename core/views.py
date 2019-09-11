@@ -1,6 +1,6 @@
 from functools import reduce
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import Http404, JsonResponse
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -46,7 +46,7 @@ class MeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             selected_dates = request.GET.getlist('date')
-            queryset = Meeting.objects.prefetch_related('openby').prefetch_related('rating').prefetch_related('place').filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
+            queryset = Meeting.objects.select_related('openby').prefetch_related('rating').prefetch_related('place').filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
             page = self.paginate_queryset(queryset)
 
             if page is not None:
@@ -106,7 +106,13 @@ class MyMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.filter(openby=request.user.id).filter(Q(date__gte=now))
+            queryset = Meeting.objects.prefetch_related('rating').select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).prefetch_related(
+                Prefetch(
+                    'match_receiver',
+                    queryset=MatchRequest.objects.all()
+                )
+                )
+  
             serializer = MeetingSerializer(queryset, many=True)
             #print(serializer.data)
             return Response(serializer.data)
@@ -149,7 +155,27 @@ class MeetingCreateView(APIView):
         #print(serializer.errors)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class MeetingRequestMatchView(APIView):
+class MeetingReceivedRequestMatchView(APIView):
+    permission = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0]))
+            serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+
+class MeetingSentRequestMatchView(APIView):
+    permission = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(Q(sender__id=request.GET.getlist('meeting_id')[0]))
+            serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+
+class MeetingSendRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -157,13 +183,6 @@ class MeetingRequestMatchView(APIView):
             date = datetime.strptime(date_string, "%Y %m월 %d일").date()
             return date
         except:
-            raise Http404
-    def get(self, request, *args, **kwargs):
-        try:
-            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0]))
-            serializer = MatchRequestSerializer(queryset, many=True, context={'request': request})
-            return Response(serializer.data)
-        except Meeting.DoesNotExist as e:
             raise Http404
     def post(self, request, *args, **kwargs):
         data = {
@@ -190,4 +209,3 @@ class MeetingRequestMatchView(APIView):
                 # TODO: push notification to receiver
                 return Response(data=match.id, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
