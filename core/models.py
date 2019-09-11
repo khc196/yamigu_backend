@@ -36,9 +36,9 @@ class Meeting(models.Model):
     openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_openby")
     date = models.DateField(null=False, blank=False)
     place_type = models.ForeignKey(PlaceType, on_delete=models.SET_NULL, null=True, related_name="meeting_place_type")
-    place = models.ForeignKey(Place, on_delete=models.SET_NULL, null=True, related_name="meeting_place")
+    place = models.ForeignKey(Place, on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_place")
     appeal = models.TextField()
-    rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, null=True)
+    rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, blank=True, null=True)
     is_matched = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
