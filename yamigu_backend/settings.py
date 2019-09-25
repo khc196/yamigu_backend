@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'authorization',
     'rest_auth',
     'django.contrib.sites',
+    'drf_yasg',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
