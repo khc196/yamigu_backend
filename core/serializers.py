@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, CurrentUserDefault, CharField
-
+from django.db.models import Q
 from .models import *
 
 class MeetingTypeSerializer(ModelSerializer):
@@ -27,7 +27,7 @@ class MeetingSerializer(ModelSerializer):
     openby_profile = CharField(source='openby.image', read_only=True)
     received_request = SerializerMethodField('get_match_request_prefetch_related')
     def get_match_request_prefetch_related(self, meeting):
-        match_request_queryset = meeting.match_receiver.all().order_by('created_at')
+        match_request_queryset = meeting.match_receiver.all().order_by('created_at').filter(Q(is_declined=False))
         return match_request_queryset.count()
     class Meta:
         model = Meeting

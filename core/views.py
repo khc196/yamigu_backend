@@ -2,6 +2,7 @@ from functools import reduce
 
 from django.db.models import Q, Prefetch
 from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
@@ -159,7 +160,7 @@ class MeetingReceivedRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0]))
+            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0])).filter(Q(is_declined=False))
             serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
@@ -209,3 +210,41 @@ class MeetingSendRequestMatchView(APIView):
                 # TODO: push notification to receiver
                 return Response(data=match.id, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MeetingCancelRequestMatchView(APIView):
+	permission = [IsAuthenticated]
+	def post(self, request, *args, **kwargs):
+		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+		sender_user_id = match_request.sender.openby.id
+
+		if request.user.id == sender_user_id:
+			match_request.delete()
+			return Response(data=match_request.id, status=status.HTTP_204_NO_CONTENT)
+		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+
+class MeetingAcceptRequestMatchView(APIView):
+	permission = [IsAuthenticated]
+	def post(self, request, *args, **kwargs):
+		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+		receiver_user_id = match_request.receiver.openby.id
+
+		if request.user.id == receiver_user_id:
+			match_request.is_selected = True
+			match_request.sender.is_matched = True
+			match_request.receiver.is_matched = True
+			match_request.save()
+			return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+
+class MeetingDeclineRequestMatchView(APIView):
+	permission = [IsAuthenticated]
+	def post(self, request, *args, **kwargs):
+		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+
+		receiver_user_id = match_request.receiver.openby.id
+
+		if request.user.id == receiver_user_id:
+			match_request.is_declined = True
+			match_request.save()
+			return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+

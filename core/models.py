@@ -52,5 +52,6 @@ class MatchRequest(models.Model):
     receiver = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_receiver")
     sender = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_sender")
     is_selected = models.BooleanField(default=False)
+    is_declined = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
