@@ -156,6 +156,39 @@ class MeetingCreateView(APIView):
         #print(serializer.errors)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MeetingEditView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_date_object(self, date_string):
+        try:
+            date_string = str(datetime.now().year) + " " + date_string 
+            date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+            return date
+        except:
+            raise Http404
+    def post(self, request, *args, **kwargs):
+        data = {
+                'openby': request.user.id,
+                'meeting_type': request.data['meeting_type'],
+                'date': self.get_date_object(request.data['date']),
+                'place_type': request.data['place'],
+                'appeal': request.data['appeal'],
+                'place': None,
+                'rating': None,
+                'is_matched': False,
+            }
+        print(data)
+        meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
+        serializer = MeetingCreateSerializer(meeting, data=data)
+        if serializer.is_valid():
+            meeting = serializer.save()
+            return Response(data=meeting.id, status=status.HTTP_200_OK)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+class MeetingDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
+        meeting.delete()
+        return Response(data=meeting.id, status=status.HTTP_204_NO_CONTENT)
 class MeetingReceivedRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
@@ -211,15 +244,14 @@ class MeetingSendRequestMatchView(APIView):
                 return Response(data=match.id, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingCancelRequestMatchView(APIView):
-	permission = [IsAuthenticated]
-	def post(self, request, *args, **kwargs):
-		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
-		sender_user_id = match_request.sender.openby.id
-
-		if request.user.id == sender_user_id:
-			match_request.delete()
-			return Response(data=match_request.id, status=status.HTTP_204_NO_CONTENT)
-		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+        sender_user_id = match_request.sender.openby.id
+        if request.user.id == sender_user_id:
+            match_request.delete()
+            return Response(data=match_request.id, status=status.HTTP_204_NO_CONTENT)
+        return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingAcceptRequestMatchView(APIView):
 	permission = [IsAuthenticated]
