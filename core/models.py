@@ -40,6 +40,7 @@ class Meeting(models.Model):
     appeal = models.TextField()
     rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, blank=True, null=True)
     is_matched = models.BooleanField(default=False)
+    matched_meeting = models.ForeignKey("Meeting", on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_matched")
     created_at = models.DateTimeField(auto_now_add=True)
     
 

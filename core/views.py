@@ -254,18 +254,23 @@ class MeetingCancelRequestMatchView(APIView):
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingAcceptRequestMatchView(APIView):
-	permission = [IsAuthenticated]
-	def post(self, request, *args, **kwargs):
-		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
-		receiver_user_id = match_request.receiver.openby.id
-
-		if request.user.id == receiver_user_id:
-			match_request.is_selected = True
-			match_request.sender.is_matched = True
-			match_request.receiver.is_matched = True
-			match_request.save()
-			return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
-		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+        receiver_user_id = match_request.receiver.openby.id
+        if request.user.id == receiver_user_id:
+            match_request.is_selected = True
+            sender = Meeting.objects.get(pk=match_request.sender.id)
+            receiver = Meeting.objects.get(pk=match_request.receiver.id)
+            sender.is_matched = True
+            receiver.is_matched = True
+            sender.matched_meeting = receiver
+            receiver.matched_meeting = sender
+            sender.save()
+            receiver.save()
+            match_request.save()
+            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+        return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingDeclineRequestMatchView(APIView):
 	permission = [IsAuthenticated]
