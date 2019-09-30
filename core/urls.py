@@ -14,6 +14,7 @@ api_urlpattern = [
     path('meetings/received_request/', MeetingReceivedRequestMatchView.as_view()),
     path('meetings/sent_request/', MeetingSentRequestMatchView.as_view()),
     path('meetings/send_request/', MeetingSendRequestMatchView.as_view()),
+    path('meetings/send_request_new/', MeetingSendRequestMatchNewView.as_view()),
 	path('meetings/cancel_request/', MeetingCancelRequestMatchView.as_view()),
 	path('meetings/accept_request/', MeetingAcceptRequestMatchView.as_view()),
 	path('meetings/decline_request/', MeetingDeclineRequestMatchView.as_view()),

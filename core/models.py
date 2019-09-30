@@ -43,6 +43,11 @@ class Meeting(models.Model):
     matched_meeting = models.ForeignKey("Meeting", on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_matched")
     created_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        unique_together = (
+            ("openby", "date")
+        )
+    
 
 class PlaceImage(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE)

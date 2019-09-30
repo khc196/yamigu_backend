@@ -107,7 +107,7 @@ class MyMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.prefetch_related('rating').select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).prefetch_related(
+            queryset = Meeting.objects.prefetch_related('rating').select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).order_by('date').prefetch_related(
                 Prefetch(
                     'match_receiver',
                     queryset=MatchRequest.objects.all()
@@ -154,7 +154,6 @@ class MeetingCreateView(APIView):
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_201_CREATED)
         #print(serializer.errors)
-
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingEditView(APIView):
     permission_classes = [IsAuthenticated]
@@ -176,7 +175,7 @@ class MeetingEditView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
-        print(data)
+        #print(data)
         meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
         serializer = MeetingCreateSerializer(meeting, data=data)
         if serializer.is_valid():
@@ -208,8 +207,40 @@ class MeetingSentRequestMatchView(APIView):
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
-
 class MeetingSendRequestMatchView(APIView):
+    permission = [IsAuthenticated]
+    def get_date_object(self, date_string):
+        try:
+            date_string = str(datetime.now().year) + date_string.strip()
+            date = datetime.strptime(date_string, "%Y%m월%d일").date()
+            return date
+        except:
+            raise JsonResponse({
+            'message': 'Invalid date format', 
+            'code': 404
+        })
+    def post(self, request, *args, **kwargs):
+        prev_meeting = Meeting.objects.filter(openby=request.user.id).filter(meeting_type=request.data['meeting_type']).filter(date=self.get_date_object(request.data['date'])).filter(place_type=request.data['place'])
+        if(prev_meeting.count() == 0) :
+            return JsonResponse({
+                'message': 'You should create new meeting for matching', 
+                'code': 204
+        })
+        data = {
+            'sender': prev_meeting[0].id,
+            'receiver': request.data['meeting_id'],
+            'is_selected': False
+            }
+        serializer = MatchRequestSerializer(data=data)
+        if serializer.is_valid():
+            match = serializer.save()
+            # TODO: push notification to receiver
+            return JsonResponse({
+                'message': 'Created',
+                'code': 201
+            })
+        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+class MeetingSendRequestMatchNewView(APIView):
     permission = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -229,6 +260,7 @@ class MeetingSendRequestMatchView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
+    
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
@@ -269,7 +301,16 @@ class MeetingAcceptRequestMatchView(APIView):
             sender.save()
             receiver.save()
             match_request.save()
-            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+            count_meeting = Meeting.objects.all().filter(openby=request.user.id).filter(is_matched=True).count()
+            
+            return JsonResponse({
+                'data': {
+                    'match_id': match_request.id,
+                    'count_meeting': count_meeting,
+                    'message': "Accepted"
+                },
+                'code': 202
+            })
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingDeclineRequestMatchView(APIView):

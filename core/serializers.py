@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, CurrentUserDefault, CharField
+from rest_framework.validators import UniqueTogetherValidator
 from django.db.models import Q
 from .models import *
 
@@ -46,6 +47,12 @@ class MeetingCreateSerializer(ModelSerializer):
     class Meta:
         model = Meeting
         fields = ("id", "meeting_type", "openby", "date", "place_type", "appeal", "rating", "is_matched", "created_at")
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Meeting.objects.all(), 
+                fields=['openby', 'date']
+            )
+        ]
 class MatchRequestSerializer(ModelSerializer):
     class Meta:
         model = MatchRequest
