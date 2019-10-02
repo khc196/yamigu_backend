@@ -29,6 +29,7 @@ class Rating(models.Model):
     visual = models.IntegerField()
     fun = models.IntegerField()
     manner = models.IntegerField()
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Meeting(models.Model):

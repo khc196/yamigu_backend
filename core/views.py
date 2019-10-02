@@ -107,7 +107,7 @@ class MyMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.prefetch_related('rating').select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).order_by('date').prefetch_related(
+            queryset = Meeting.objects.select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).order_by('date').prefetch_related(
                 Prefetch(
                     'match_receiver',
                     queryset=MatchRequest.objects.all()
@@ -120,6 +120,24 @@ class MyMeetingListView(APIView):
         except Meeting.DoesNotExist as e:
             raise Http404
 
+class MyPastMeetingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            now=datetime.today()
+            queryset = Meeting.objects.filter(is_matched=True).filter(rating=None).filter(openby=request.user.id).filter(Q(date__lt=now)).order_by('date').prefetch_related(
+                Prefetch(
+                    'match_receiver',
+                    queryset=MatchRequest.objects.all()
+                )
+            )
+
+            serializer = MeetingSerializer(queryset, many=True)
+            print(serializer.data)
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
 
 class MeetingDetailView(APIView):
     serializer_class = MeetingSerializer
@@ -311,6 +329,7 @@ class MeetingAcceptRequestMatchView(APIView):
                 },
                 'code': 202
             })
+            
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingDeclineRequestMatchView(APIView):

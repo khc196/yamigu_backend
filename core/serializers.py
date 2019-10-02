@@ -26,7 +26,7 @@ class MatchedMeetingSerializer(ModelSerializer):
     openby_department = CharField(source='openby.department', read_only=True)
     class Meta:
         model = Meeting
-        fields = ("id", "openby_nickname", "openby_age", "openby_belong", "openby_department")
+        fields = ("id", "openby_nickname", "openby_age", "openby_belong", "openby_department", "rating")
 class MeetingSerializer(ModelSerializer):
     place_type_name = CharField(source='place_type.name', read_only=True)
     openby_nickname = CharField(source='openby.nickname', read_only=True)
