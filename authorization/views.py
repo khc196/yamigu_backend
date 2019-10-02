@@ -37,14 +37,17 @@ class NicknameValidator(APIView):
             return JsonResponse({
                 "is_available": True
             })
-            
+
 class ChangeNicknameView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user.id)
         user.nickname = request.data['nickname']
         user.save()
-        return Response(data=None, status=status.HTTP_200_OK)
+        return JsonResponse({
+            'code': 200,
+            'data': user.nickname
+        })
 
 class SignUpView(APIView):
     def post(Self, request, *args, **kwargs):
