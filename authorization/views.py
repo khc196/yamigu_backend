@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticated
 
-from django.http import Http404
+from django.http import Http404, JsonResponse
 
 from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
 from rest_auth.registration.views import SocialLoginView
@@ -27,10 +27,15 @@ class UserInfoView(APIView):
 
 class NicknameValidator(APIView):
     def get(self, request, nickname):
-        if(User.objects.filter(nickname=nickname).exists()):
-            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+    
+        if(not nickname or User.objects.filter(nickname=nickname).exists()):
+            return JsonResponse({
+                "is_available": False
+            })
         else:
-            return Response(data=None, status=status.HTTP_200_OK)
+            return JsonResponse({
+                "is_available": True
+            })
 class SignUpView(APIView):
     def post(Self, request, *args, **kwargs):
         user = User.objects.select_related().get(id=request.user.id)
