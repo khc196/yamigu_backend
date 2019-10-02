@@ -18,7 +18,7 @@ class PlaceSerializer(ModelSerializer):
 class RatingSerializer(ModelSerializer):
     class Meta:
         model = Rating
-        fields = ("id", "visual", "fun", "manner", "created_at")
+        fields = ("id", "visual", "fun", "manner", "description", "created_at")
 class MatchedMeetingSerializer(ModelSerializer):
     openby_nickname = CharField(source='openby.nickname', read_only=True)
     openby_age = CharField(source='openby.age', read_only=True)

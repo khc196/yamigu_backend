@@ -25,6 +25,7 @@ class Place(models.Model):
     link = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+
 class Rating(models.Model):
     visual = models.IntegerField()
     fun = models.IntegerField()
@@ -32,6 +33,8 @@ class Rating(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "(%d, %d, %d)" % (self.visual, self.fun, self.manner)
 class Meeting(models.Model):
     meeting_type = models.ForeignKey(MeetingType, on_delete=models.SET_NULL, null=True)
     openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_openby")
@@ -39,16 +42,24 @@ class Meeting(models.Model):
     place_type = models.ForeignKey(PlaceType, on_delete=models.SET_NULL, null=True, related_name="meeting_place_type")
     place = models.ForeignKey(Place, on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_place")
     appeal = models.TextField()
-    rating = models.ForeignKey(Rating, on_delete=models.SET_NULL, blank=True, null=True)
     is_matched = models.BooleanField(default=False)
     matched_meeting = models.ForeignKey("Meeting", on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_matched")
+    rating = models.OneToOneField(
+        Rating,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         unique_together = (
             ("openby", "date")
         )
-    
+    def __str__(self):
+        return "%d년 %d월 %d일 %s %s(%s)" % (self.date.year, self.date.month, self.date.day, self.meeting_type.name, self.place_type.name, self.openby.nickname)
+
+        
 
 class PlaceImage(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE)
