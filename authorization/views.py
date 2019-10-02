@@ -26,6 +26,7 @@ class UserInfoView(APIView):
         return Response(serializer.data)
 
 class NicknameValidator(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, nickname):
     
         if(not nickname or User.objects.filter(nickname=nickname).exists()):
@@ -36,6 +37,15 @@ class NicknameValidator(APIView):
             return JsonResponse({
                 "is_available": True
             })
+            
+class ChangeNicknameView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user.nickname = request.data['nickname']
+        user.save()
+        return Response(data=None, status=status.HTTP_200_OK)
+
 class SignUpView(APIView):
     def post(Self, request, *args, **kwargs):
         user = User.objects.select_related().get(id=request.user.id)
