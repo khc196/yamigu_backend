@@ -141,7 +141,7 @@ class MyMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.select_related('openby').filter(openby=request.user.id).filter(Q(date__gte=now)).order_by('date').prefetch_related(
+            queryset = Meeting.objects.select_related('openby').filter(openby=request.user.id, date__gte=now).order_by('date').prefetch_related(
                 Prefetch(
                     'match_receiver',
                     queryset=MatchRequest.objects.all()
@@ -160,7 +160,7 @@ class MyPastMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.filter(is_matched=True).filter(rating=None).filter(openby=request.user.id).filter(Q(date__lt=now)).order_by('date').prefetch_related(
+            queryset = Meeting.objects.filter(is_matched=True, rating=None, openby=request.user.id, date__lt=now).order_by('date').prefetch_related(
                 Prefetch(
                     'match_receiver',
                     queryset=MatchRequest.objects.all()
@@ -244,7 +244,7 @@ class MeetingReceivedRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(Q(receiver__id=request.GET.getlist('meeting_id')[0])).filter(Q(is_declined=False))
+            queryset = MatchRequest.objects.filter(receiver__id=request.GET.getlist('meeting_id')[0], is_declined=False)
             serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
@@ -254,7 +254,7 @@ class MeetingSentRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(Q(sender__id=request.GET.getlist('meeting_id')[0]))
+            queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0])
             serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
@@ -272,7 +272,7 @@ class MeetingSendRequestMatchView(APIView):
             'code': 404
         })
     def post(self, request, *args, **kwargs):
-        prev_meeting = Meeting.objects.filter(openby=request.user.id).filter(meeting_type=request.data['meeting_type']).filter(date=self.get_date_object(request.data['date'])).filter(place_type=request.data['place'])
+        prev_meeting = Meeting.objects.filter(openby=request.user.id, meeting_type=request.data['meeting_type'], date=self.get_date_object(request.data['date']), place_type=request.data['place'])
         if(prev_meeting.count() == 0) :
             return JsonResponse({
                 'message': 'You should create new meeting for matching', 
