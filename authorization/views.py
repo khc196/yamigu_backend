@@ -13,6 +13,11 @@ from .models import User
 
 
 class UserInfoView(APIView):
+    """
+        유저 정보 API
+        
+        ---
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -26,6 +31,11 @@ class UserInfoView(APIView):
         return Response(serializer.data)
 
 class NicknameValidator(APIView):
+    """
+        닉네임 유효성 검사 API
+        
+        ---
+    """
     permission_classes = [IsAuthenticated]
     def get(self, request, nickname):
     
@@ -39,6 +49,14 @@ class NicknameValidator(APIView):
             })
 
 class ChangeNicknameView(APIView):
+    """
+        닉네임 변경 API
+        
+        ---
+        # Body Schema
+            - nickname: 변경할 닉네임
+        
+    """
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user.id)
@@ -50,6 +68,21 @@ class ChangeNicknameView(APIView):
         })
 
 class SignUpView(APIView):
+    """
+        회원가입 API
+        
+        ---
+        # Body Schema
+            - nickname: 닉네임
+            - real_name: 실명
+            - gender: 성별(1: 남자, 2: 여자)
+            - phone: 핸드폰 번호
+            - is_student: 학생 여부
+            - belong: 소속(학교 or 직장)
+            - department: 부서(전공 or 팀)
+            - age: 나이 
+        
+    """
     def post(Self, request, *args, **kwargs):
         user = User.objects.select_related().get(id=request.user.id)
         user.nickname = request.data['nickname']

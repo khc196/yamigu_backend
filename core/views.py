@@ -13,175 +13,18 @@ from .models import *
 from authorization.models import User
 from datetime import datetime
 from .utils.pagination import MyPaginationMixin
-class MeetingTypeView(APIView):
-    def get(self, request, *args, **kwargs):
-        queryset = MeetingType.objects.all()
-        serializer = MeetingTypeSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PlaceTypeView(APIView):
-    def get(self, request, *args, **kwargs):
-        queryset = PlaceType.objects.all()
-        serializer = PlaceTypeSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PlaceView(APIView):
-    def get(self, request, *args, **kwargs):
-        queryset = Place.objects.all()
-        serializer = PlaceSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class RatingView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        data = {
-            'visual': request.data['visual'],
-            'fun': request.data['fun'],
-            'manner': request.data['manner']
-        }
-        meeting = Meeting.objects.filter(id=request.data['meeting_id']) 
-        rating = meeting.values("rating")[0]['rating']
-        serializer = RatingSerializer(data=data)
-        if serializer.is_valid():
-            rating = serializer.save()
-            meeting.update(rating=rating)
-            return Response(status=status.HTTP_201_CREATED)
-        #print(serializer.errors)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class FeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        
-        meeting = Meeting.objects.filter(id=request.data['meeting_id']).prefetch_related('rating')
-
-        rating =meeting[0].rating
-        data = {
-            'id': rating.id,
-            'visual': rating.visual,
-            'fun': rating.fun,
-            'manner': rating.manner,
-            'description': request.data['feedback'],
-        }
-        serializer = RatingSerializer(rating, data=data)
-        if serializer.is_valid():
-            rating = serializer.save()
-            meeting.update(rating=rating)
-            return Response(status=status.HTTP_200_OK)
-        print(serializer.errors)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class MeetingListView(APIView):
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
-    serializer_class = MeetingSerializer
-
-    def get(self, request, *args, **kwargs):
-        try:
-            selected_dates = request.GET.getlist('date')
-            queryset = Meeting.objects.select_related('openby').prefetch_related('rating').prefetch_related('place').filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
-            page = self.paginate_queryset(queryset)
-
-            if page is not None:
-                serializer = self.serializer_class(page, many=True)
-                return self.get_paginated_response(serializer.data)
-        except Meeting.DoesNotExist as e:
-            raise Http404
-class WaitingMeetingListView(APIView, MyPaginationMixin):
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
-    serializer_class = MeetingSerializer
-    
-    def get(self, request, *args, **kwargs):
-        try:
-            selected_dates = request.GET.getlist('date')
-            selected_types = request.GET.getlist('type')
-            selected_places = request.GET.getlist('place')
-            minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
-            maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
-            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
-            filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
-            if(maximum_age < 11):
-	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
-
-            if(len(selected_dates) == 0):
-                raise Http404
-            page = self.paginate_queryset(filtered_data)
-            if page is not None:
-                serializer = self.serializer_class(page, many=True)
-                return self.get_paginated_response(serializer.data)
-        except Meeting.DoesNotExist as e:
-            raise Http404
-class WaitingMeetingListNumberView(APIView):
-    serializer_class = MeetingSerializer
-    def get(self, request, *args, **kwargs):
-        try:
-            selected_dates = request.GET.getlist('date')
-            selected_types = request.GET.getlist('type')
-            selected_places = request.GET.getlist('place')
-            minimum_age = int(request.GET.get('minimum_age'))
-            maximum_age = int(request.GET.get('maximum_age'))
-            if(len(selected_dates) == 0):
-                raise Http404
-            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
-            filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
-            if(maximum_age < 11):
-	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
-            count = filtered_data.count()
-
-            return JsonResponse({
-                'count' : count,
-            }, json_dumps_params = {'ensure_ascii': True})
-        except Meeting.DoesNotExist as e:
-            raise Http404
-class MyMeetingListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        try:
-            now=datetime.today()
-            queryset = Meeting.objects.select_related('openby').filter(openby=request.user.id, date__gte=now).order_by('date').prefetch_related(
-                Prefetch(
-                    'match_receiver',
-                    queryset=MatchRequest.objects.all()
-                )
-                )
-  
-            serializer = MeetingSerializer(queryset, many=True)
-            #print(serializer.data)
-            return Response(serializer.data)
-        except Meeting.DoesNotExist as e:
-            raise Http404
-
-class MyPastMeetingListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        try:
-            now=datetime.today()
-            queryset = Meeting.objects.filter(is_matched=True, rating=None, openby=request.user.id, date__lt=now).order_by('date').prefetch_related(
-                Prefetch(
-                    'match_receiver',
-                    queryset=MatchRequest.objects.all()
-                )
-            )
-
-            serializer = MeetingSerializer(queryset, many=True)
-            print(serializer.data)
-            return Response(serializer.data)
-        except Meeting.DoesNotExist as e:
-            raise Http404
-
-class MeetingDetailView(APIView):
-    serializer_class = MeetingSerializer
-    def get(self, request, *args, **kwargs):
-        queryset = Meeting.objects.all()
-        serializer = MeetingSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data)
-
 
 class MeetingCreateView(APIView):
+    """
+        새로운 미팅 생성 API
+        
+        ---
+        # Body Schema
+            - meeting_type: 미팅 타입
+            - date: 날짜
+            - place_type: 장소
+            - appeal: 어필 문구
+    """
     permission_classes = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -208,6 +51,18 @@ class MeetingCreateView(APIView):
         #print(serializer.errors)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingEditView(APIView):
+    """
+        미팅 수정 API
+        
+        ---
+        # Body Schema
+            - meeting_id: 해당 미팅 id
+            - meeting_type: 미팅 타입
+            - date: 날짜
+            - place_type: 장소
+            - appeal: 어필 문구
+        
+    """
     permission_classes = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -233,33 +88,158 @@ class MeetingEditView(APIView):
         if serializer.is_valid():
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_200_OK)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 class MeetingDeleteView(APIView):
+    """
+        미팅 삭제 API
+        
+        ---
+        # Body Schema
+            - meeting_id: 해당 미팅 id
+        
+    """
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
         meeting.delete()
         return Response(data=meeting.id, status=status.HTTP_204_NO_CONTENT)
-class MeetingReceivedRequestMatchView(APIView):
-    permission = [IsAuthenticated]
+
+class MyMeetingListView(APIView):
+    """
+        마이 미팅 리스트 (미진행) API 
+        
+        ---
+        # 아직 진행되지 않은 마이 미팅 리스트
+    """
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(receiver__id=request.GET.getlist('meeting_id')[0], is_declined=False)
-            serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
+            now=datetime.today()
+            queryset = Meeting.objects.select_related('openby').filter(openby=request.user.id, date__gte=now).order_by('date').prefetch_related(
+                Prefetch(
+                    'match_receiver',
+                    queryset=MatchRequest.objects.all()
+                )
+                )
+  
+            serializer = MeetingSerializer(queryset, many=True)
+            #print(serializer.data)
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+class MyPastMeetingListView(APIView):
+    """
+        마이 미팅 리스트 (후기 작성 필요) API 
+
+        ---
+        # 진행된 과거의 마이 미팅 리스트 중 후기 작성이 안된 리스트
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            now=datetime.today()
+            queryset = Meeting.objects.filter(is_matched=True, rating=None, openby=request.user.id, date__lt=now).order_by('date').prefetch_related(
+                Prefetch(
+                    'match_receiver',
+                    queryset=MatchRequest.objects.all()
+                )
+            )
+
+            serializer = MeetingSerializer(queryset, many=True)
+            #print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
 
-class MeetingSentRequestMatchView(APIView):
-    permission = [IsAuthenticated]
+class WaitingMeetingListView(APIView, MyPaginationMixin):
+    """
+        대기 리스트 API
+        
+        ---
+        # Get Parameters
+            - date: 날짜 (yyyy-mm-dd format)
+            - type: 미팅 타입 (1=2:2, 2=3:3, 3=4:4)
+            - place: 장소(1=신촌/홍대, 2=건대/왕십리, 3=강남)
+            - minimum_age: 최소 나이(0~11, 0부터 20살, 11은 31세 이상)
+            - maximum_age: 최대 나이(0~11)
+        # Example
+            - https://147.47.208.44:9999/api/meetings/?date=2019-10-11&date=2019-10-12&type=1&place=1&place=2&place=3
+        
+    """
+    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+    serializer_class = MeetingSerializer
+    
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0])
-            serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
-            return Response(serializer.data)
+            selected_dates = request.GET.getlist('date')
+            selected_types = request.GET.getlist('type')
+            selected_places = request.GET.getlist('place')
+            minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
+            maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
+            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
+            if(maximum_age < 11):
+	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
+
+            if(len(selected_dates) == 0):
+                raise Http404
+            page = self.paginate_queryset(filtered_data)
+            if page is not None:
+                serializer = self.serializer_class(page, many=True)
+                return self.get_paginated_response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+
+class WaitingMeetingListNumberView(APIView):
+    """
+        대기 리스트 Count API
+        
+        ---
+        # Get Parameters
+            - date: 날짜 (yyyy-mm-dd format)
+            - type: 미팅 타입 (1=2:2, 2=3:3, 3=4:4)
+            - place: 장소(1=신촌/홍대, 2=건대/왕십리, 3=강남)
+            - minimum_age: 최소 나이(0~11, 0부터 20살, 11은 31세 이상)
+            - maximum_age: 최대 나이(0~11)
+        # Example
+            - https://147.47.208.44:9999/api/meetings/count/?date=2019-10-11&date=2019-10-12&type=1&place=1&place=2&place=3
+        
+    """
+    serializer_class = MeetingSerializer
+    def get(self, request, *args, **kwargs):
+        try:
+            selected_dates = request.GET.getlist('date')
+            selected_types = request.GET.getlist('type')
+            selected_places = request.GET.getlist('place')
+            minimum_age = int(request.GET.get('minimum_age'))
+            maximum_age = int(request.GET.get('maximum_age'))
+            if(len(selected_dates) == 0):
+                raise Http404
+            filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
+            if(maximum_age < 11):
+	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
+            count = filtered_data.count()
+
+            return JsonResponse({
+                'count' : count,
+            }, json_dumps_params = {'ensure_ascii': True})
         except Meeting.DoesNotExist as e:
             raise Http404
 class MeetingSendRequestMatchView(APIView):
+    """
+        매칭 신청 API
+        
+        ---
+        # Body Schema
+            - meeting_type: 미팅 타입
+            - date: 날짜
+            - place: 장소
+            - receiver: 신청 대상 미팅
+        
+    """
     permission = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -293,6 +273,18 @@ class MeetingSendRequestMatchView(APIView):
             })
         return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
 class MeetingSendRequestMatchNewView(APIView):
+    """
+        매칭 신청(새로운 카드 생성) API
+        
+        ---
+        # Body Schema
+            - meeting_type: 미팅 타입
+            - date: 날짜
+            - place: 장소
+            - appeal: 어필 문구
+            - receiver: 신청 대상 미팅
+        
+    """
     permission = [IsAuthenticated]
     def get_date_object(self, date_string):
         try:
@@ -327,17 +319,52 @@ class MeetingSendRequestMatchNewView(APIView):
                 # TODO: push notification to receiver
                 return Response(data=match.id, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class MeetingCancelRequestMatchView(APIView):
+
+class MeetingReceivedRequestMatchView(APIView):
+    """
+         받은 매칭 신청 리스트 API
+        
+        ---
+        # Body Schema
+            - meeting_id: 해당 미팅 id
+        
+    """
     permission = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
-        sender_user_id = match_request.sender.openby.id
-        if request.user.id == sender_user_id:
-            match_request.delete()
-            return Response(data=match_request.id, status=status.HTTP_204_NO_CONTENT)
-        return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(receiver__id=request.GET.getlist('meeting_id')[0], is_declined=False)
+            serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+
+class MeetingSentRequestMatchView(APIView):
+    """
+        보낸 매칭 신청 리스트 API
+        
+        ---
+        # Body Schema
+            - meeting_id: 해당 미팅 id
+        
+    """
+    permission = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0])
+            serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
 
 class MeetingAcceptRequestMatchView(APIView):
+    """
+        매칭 신청 수락 API
+        
+        ---
+        # Body Schema
+            - request_id: 매칭 신청 id
+        
+    """
     permission = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
@@ -366,16 +393,158 @@ class MeetingAcceptRequestMatchView(APIView):
             
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
+class MeetingCancelRequestMatchView(APIView):
+    """
+        매칭 신청 취소 API
+        
+        ---
+        # Body Schema
+            - meeting_type: 미팅 타입
+            - request_id: 매칭 신청 id
+        
+    """
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+        sender_user_id = match_request.sender.openby.id
+        if request.user.id == sender_user_id:
+            match_request.delete()
+            return Response(data=match_request.id, status=status.HTTP_204_NO_CONTENT)
+        return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+
 class MeetingDeclineRequestMatchView(APIView):
-	permission = [IsAuthenticated]
-	def post(self, request, *args, **kwargs):
-		match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+    """
+        매칭 신청 거절 API
+        
+        ---
+        # Body Schema
+            - request_id: 매칭 신청 id
+        
+    """
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
+        receiver_user_id = match_request.receiver.openby.id
+        if request.user.id == receiver_user_id:
+            match_request.is_declined = True
+            match_request.save()
+            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+        return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
-		receiver_user_id = match_request.receiver.openby.id
+class RatingView(APIView):
+    """
+        별점 평가 API
 
-		if request.user.id == receiver_user_id:
-			match_request.is_declined = True
-			match_request.save()
-			return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
-		return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+        ---
+        # Request Body Schema
+            - meeting_id: 해당 미팅 id
+            - visual: visual 점수
+            - fun: fun 점수
+            - manner: manner 점수
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        data = {
+            'visual': request.data['visual'],
+            'fun': request.data['fun'],
+            'manner': request.data['manner']
+        }
+        meeting = Meeting.objects.filter(id=request.data['meeting_id']) 
+        rating = meeting.values("rating")[0]['rating']
+        serializer = RatingSerializer(data=data)
+        if serializer.is_valid():
+            rating = serializer.save()
+            meeting.update(rating=rating)
+            return Response(status=status.HTTP_201_CREATED)
+        #print(serializer.errors)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FeedbackView(APIView):
+    """
+        후기 API
+        
+        ---
+        # Request Body Schema
+            - meeting_id: 해당 미팅 id
+            - feedback: 후기 내용
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        
+        meeting = Meeting.objects.filter(id=request.data['meeting_id']).prefetch_related('rating')
+
+        rating =meeting[0].rating
+        data = {
+            'id': rating.id,
+            'visual': rating.visual,
+            'fun': rating.fun,
+            'manner': rating.manner,
+            'description': request.data['feedback'],
+        }
+        serializer = RatingSerializer(rating, data=data)
+        if serializer.is_valid():
+            rating = serializer.save()
+            meeting.update(rating=rating)
+            return Response(status=status.HTTP_200_OK)
+        print(serializer.errors)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class MeetingTypeView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         queryset = MeetingType.objects.all()
+#         serializer = MeetingTypeSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)
+
+
+# class PlaceTypeView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         queryset = PlaceType.objects.all()
+#         serializer = PlaceTypeSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)
+
+
+# class PlaceView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         queryset = Place.objects.all()
+#         serializer = PlaceSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)
+
+
+# class MeetingListView(APIView): 
+#     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
+#     serializer_class = MeetingSerializer
+
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             selected_dates = request.GET.getlist('date')
+#             queryset = Meeting.objects.select_related('openby').prefetch_related('rating').prefetch_related('place').filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(~Q(openby=request.user.id)).order_by('date', 'created_at')
+#             page = self.paginate_queryset(queryset)
+
+#             if page is not None:
+#                 serializer = self.serializer_class(page, many=True)
+#                 return self.get_paginated_response(serializer.data)
+#         except Meeting.DoesNotExist as e:
+#             raise Http404
+
+
+
+
+
+
+# class MeetingDetailView(APIView):
+    
+#     serializer_class = MeetingSerializer
+#     def get(self, request, *args, **kwargs):
+#         queryset = Meeting.objects.all()
+#         serializer = MeetingSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)
+
+
+
+      
+
+
+
+
 
