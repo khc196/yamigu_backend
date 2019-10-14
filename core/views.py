@@ -140,15 +140,14 @@ class MyPastMeetingListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             now=datetime.today()
-            queryset = Meeting.objects.filter(is_matched=True, rating=None, openby=request.user.id, date__lt=now).order_by('date').prefetch_related(
+            queryset = Meeting.objects.filter(is_matched=True, openby=request.user.id, date__lt=now, meeting_matched__rating=None).order_by('date').prefetch_related(
                 Prefetch(
                     'match_receiver',
                     queryset=MatchRequest.objects.all()
                 )
             )
-
             serializer = MeetingSerializer(queryset, many=True)
-            #print(serializer.data)
+            print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
