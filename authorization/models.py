@@ -4,8 +4,12 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import PermissionsMixin
 from django.utils.translation import gettext as _
+from django.conf import settings
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import auth
 
-
+import os
 class UserManager(BaseUserManager):
     def create_user(self, name, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not gender:
@@ -61,9 +65,18 @@ class UserManager(BaseUserManager):
         
         user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
         user.image = extra_data['properties']['profile_image']
+        user.firebase_token = create_token_uid(str(extra_data['id']))
         user.save(using=self._db)
         return user
 
+def create_token_uid(uid):
+
+    # [START create_token_uid]
+  
+    custom_token = auth.create_custom_token(uid)
+    custom_token = custom_token.decode('utf-8')
+    # [END create_token_uid]
+    return custom_token
 
 class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=20, null=True, unique=True)
@@ -84,6 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     token = Token
+    firebase_token= models.CharField(max_length=1000, null=True, unique=True)
     objects = UserManager()
 
     USERNAME_FIELD = 'name'
