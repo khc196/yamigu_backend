@@ -10,6 +10,19 @@ from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
 from rest_auth.registration.views import SocialLoginView
 from .serializers import UserSerializer
 from .models import User
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import auth
+
+
+def create_token_uid(uid):
+
+    # [START create_token_uid]
+
+    custom_token = auth.create_custom_token(uid)
+    custom_token = custom_token.decode('utf-8')
+    # [END create_token_uid]
+    return custom_token
 
 
 class UserInfoView(APIView):
@@ -25,7 +38,14 @@ class UserInfoView(APIView):
 
         if user is None:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-        
+        uid = user.uid
+        user.firebase_token = create_token_uid(uid)
+        user.save()
+        auth.update_user(
+        	uid=uid,
+        	display_name=user.nickname,
+        	photo_url=user.image,
+        )
         queryset = User.objects.select_related().get(id=user.id)
         serializer = UserSerializer(queryset, many=False)
         return Response(serializer.data)

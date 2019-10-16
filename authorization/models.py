@@ -64,8 +64,10 @@ class UserManager(BaseUserManager):
         user = User.objects.get(pk=user_pk)
         
         user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
+        user.uid = str(extra_data['id'])
         user.image = extra_data['properties']['profile_image']
         user.firebase_token = create_token_uid(str(extra_data['id']))
+        auth.create_user(uid=user.uid, photo_url=user.image)
         user.save(using=self._db)
         return user
 
@@ -80,6 +82,7 @@ def create_token_uid(uid):
 
 class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=20, null=True, unique=True)
+    uid = models.CharField(max_length=20, null=True, unique=True)
     real_name = models.CharField(max_length=20, null=True)
     gender = models.IntegerField(blank=False, null=True)
     nickname = models.CharField(max_length=20, blank=True, null=True, unique=True)

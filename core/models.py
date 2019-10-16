@@ -58,7 +58,7 @@ class Meeting(models.Model):
             ("openby", "date")
         )
     def __str__(self):
-        return "%d년 %d월 %d일 %s %s(%s)" % (self.date.year, self.date.month, self.date.day, self.meeting_type.name, self.place_type.name, self.openby.nickname)
+        return "%d년 %d월 %d일 %s %s" % (self.date.year, self.date.month, self.date.day, self.meeting_type.name, self.place_type.name)
 
         
 
