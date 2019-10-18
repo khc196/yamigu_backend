@@ -20,9 +20,9 @@ class MeetingCreateView(APIView):
         
         ---
         # Body Schema
-            - meeting_type: 미팅 타입
-            - date: 날짜
-            - place_type: 장소
+            - meeting_type: 미팅 타입 (1: 2vs2, 2: 3vs3, 3: 4vs4)
+            - date: 날짜(M월 d일)
+            - place: 장소
             - appeal: 어필 문구
     """
     permission_classes = [IsAuthenticated]
@@ -48,7 +48,8 @@ class MeetingCreateView(APIView):
         if serializer.is_valid():
             meeting = serializer.save()
             return Response(data=meeting.id, status=status.HTTP_201_CREATED)
-        #print(serializer.errors)
+        print(serializer.errors)
+       
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingEditView(APIView):
     """
@@ -151,7 +152,17 @@ class MyPastMeetingListView(APIView):
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
-
+class TodayMeetingListView(APIView):
+	permission_classes = [IsAuthenticated]
+	def get(self, request, *args, **kwargs):
+		try:
+			now=datetime.today()
+			queryset = Meeting.objects.filter(is_matched=False, date=now).filter(~Q(openby=request.user.id))
+			serializer = MeetingSerializer(queryset, many=True)
+			return Response(serializer.data)
+		except Meeting.DoesNotExist as e:
+			raise Http404
+			
 class WaitingMeetingListView(APIView, MyPaginationMixin):
     """
         대기 리스트 API

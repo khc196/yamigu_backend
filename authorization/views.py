@@ -15,6 +15,28 @@ from firebase_admin import credentials
 from firebase_admin import auth
 
 
+def pretty_request(request):
+    headers = ''
+    for header, value in request.META.items():
+        if not header.startswith('HTTP'):
+            continue
+        header = '-'.join([h.capitalize() for h in header[5:].lower().split('_')])
+        headers += '{}: {}\n'.format(header, value)
+
+    return (
+        '{method} HTTP/1.1\n'
+        'Content-Length: {content_length}\n'
+        'Content-Type: {content_type}\n'
+        '{headers}\n\n'
+        '{body}'
+    ).format(
+        method=request.method,
+        content_length=request.META['CONTENT_LENGTH'],
+        content_type=request.META['CONTENT_TYPE'],
+        headers=headers,
+        body=request.body,
+    )
+
 def create_token_uid(uid):
 
     # [START create_token_uid]
@@ -31,11 +53,10 @@ class UserInfoView(APIView):
         
         ---
     """
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = request.user
-
         if user is None:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
         uid = user.uid
@@ -56,7 +77,7 @@ class NicknameValidator(APIView):
         
         ---
     """
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def get(self, request, nickname):
     
         if(not nickname or User.objects.filter(nickname=nickname).exists()):
@@ -77,7 +98,7 @@ class ChangeNicknameView(APIView):
             - nickname: 변경할 닉네임
         
     """
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user.id)
         user.nickname = request.data['nickname']
