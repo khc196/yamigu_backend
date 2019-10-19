@@ -125,7 +125,7 @@ class MyMeetingListView(APIView):
                 )
   
             serializer = MeetingSerializer(queryset, many=True)
-            #print(serializer.data)
+            print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
@@ -148,7 +148,7 @@ class MyPastMeetingListView(APIView):
                 )
             )
             serializer = MeetingSerializer(queryset, many=True)
-            print(serializer.data)
+           # print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
@@ -188,6 +188,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             selected_places = request.GET.getlist('place')
             minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
             maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
+            print(request.user.id)
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
             if(maximum_age < 11):
@@ -198,6 +199,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             page = self.paginate_queryset(filtered_data)
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
+                print(serializer.data)
                 return self.get_paginated_response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
@@ -362,6 +364,7 @@ class MeetingSentRequestMatchView(APIView):
         try:
             queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0])
             serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
+           # print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404

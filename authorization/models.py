@@ -65,9 +65,15 @@ class UserManager(BaseUserManager):
         
         user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
         user.uid = str(extra_data['id'])
-        user.image = extra_data['properties']['profile_image']
-        user.firebase_token = create_token_uid(str(extra_data['id']))
-        auth.create_user(uid=user.uid, photo_url=user.image)
+        try:
+        	user.image = extra_data['properties']['profile_image']
+        except KeyError:
+        	pass
+       	user.firebase_token = create_token_uid(str(extra_data['id']))
+       	try:
+       		auth.create_user(uid=user.uid, photo_url=user.image)
+       	except ValueError:
+       		auth.create_user(uid=user.uid)
         user.save(using=self._db)
         return user
 

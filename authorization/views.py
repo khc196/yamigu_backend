@@ -62,11 +62,17 @@ class UserInfoView(APIView):
         uid = user.uid
         user.firebase_token = create_token_uid(uid)
         user.save()
-        auth.update_user(
-        	uid=uid,
-        	display_name=user.nickname,
-        	photo_url=user.image,
-        )
+        try:
+        	auth.update_user(
+        		uid=uid,
+        		display_name=user.nickname,
+	        	photo_url=user.image,
+     	   	)
+        except ValueError:
+        	auth.update_user(
+     			uid=uid,
+     			display_name=user.nickname
+     		)
         queryset = User.objects.select_related().get(id=user.id)
         serializer = UserSerializer(queryset, many=False)
         return Response(serializer.data)
