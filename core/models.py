@@ -36,17 +36,17 @@ class Rating(models.Model):
     def __str__(self):
         return "(%d, %d, %d)" % (self.visual, self.fun, self.manner)
 class Meeting(models.Model):
-    meeting_type = models.ForeignKey(MeetingType, on_delete=models.SET_NULL, null=True)
-    openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_openby")
+    meeting_type = models.ForeignKey(MeetingType, on_delete=models.CASCADE, null=True)
+    openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, related_name="meeting_openby")
     date = models.DateField(null=False, blank=False)
-    place_type = models.ForeignKey(PlaceType, on_delete=models.SET_NULL, null=True, related_name="meeting_place_type")
-    place = models.ForeignKey(Place, on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_place")
+    place_type = models.ForeignKey(PlaceType, on_delete=models.CASCADE, null=True, related_name="meeting_place_type")
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, blank=True, null=True, related_name="meeting_place")
     appeal = models.TextField()
     is_matched = models.BooleanField(default=False)
-    matched_meeting = models.ForeignKey("Meeting", on_delete=models.SET_NULL, blank=True, null=True, related_name="meeting_matched")
+    matched_meeting = models.ForeignKey("Meeting", on_delete=models.CASCADE, blank=True, null=True, related_name="meeting_matched")
     rating = models.OneToOneField(
         Rating,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name="meeting_rating",
@@ -70,7 +70,9 @@ class PlaceImage(models.Model):
 class MatchRequest(models.Model):
     receiver = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_receiver")
     sender = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name="match_sender")
+    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_manager")
     is_selected = models.BooleanField(default=False)
     is_declined = models.BooleanField(default=False)
+    accepted_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     

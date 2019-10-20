@@ -230,6 +230,7 @@ class WaitingMeetingListNumberView(APIView):
             if(len(selected_dates) == 0):
                 raise Http404
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            filtered_data = filtered_data.exclude(is_matched=True)
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
             if(maximum_age < 11):
 	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
@@ -273,6 +274,7 @@ class MeetingSendRequestMatchView(APIView):
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
+            'manager': 26,
             'is_selected': False
             }
         serializer = MatchRequestSerializer(data=data)
@@ -384,6 +386,7 @@ class MeetingAcceptRequestMatchView(APIView):
         receiver_user_id = match_request.receiver.openby.id
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
+            match_request.accepted_at = datetime.now
             sender = Meeting.objects.get(pk=match_request.sender.id)
             receiver = Meeting.objects.get(pk=match_request.receiver.id)
             sender.is_matched = True
