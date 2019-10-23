@@ -225,8 +225,8 @@ class WaitingMeetingListNumberView(APIView):
             selected_dates = request.GET.getlist('date')
             selected_types = request.GET.getlist('type')
             selected_places = request.GET.getlist('place')
-            minimum_age = int(request.GET.get('minimum_age'))
-            maximum_age = int(request.GET.get('maximum_age'))
+            minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
+            maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
             if(len(selected_dates) == 0):
                 raise Http404
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
@@ -386,7 +386,7 @@ class MeetingAcceptRequestMatchView(APIView):
         receiver_user_id = match_request.receiver.openby.id
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
-            match_request.accepted_at = datetime.now
+            match_request.accepted_at = datetime.now()
             sender = Meeting.objects.get(pk=match_request.sender.id)
             receiver = Meeting.objects.get(pk=match_request.receiver.id)
             sender.is_matched = True

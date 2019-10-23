@@ -58,7 +58,10 @@ class Meeting(models.Model):
             ("openby", "date")
         )
     def __str__(self):
-        return "%d년 %d월 %d일 %s %s" % (self.date.year, self.date.month, self.date.day, self.meeting_type.name, self.place_type.name)
+    	name = ""
+    	if(self.openby != None):
+    		name = self.openby.nickname
+    	return "%d년 %d월 %d일 %s %s(%s)" % (self.date.year, self.date.month, self.date.day, self.meeting_type.name, self.place_type.name, name)
 
         
 
@@ -73,6 +76,6 @@ class MatchRequest(models.Model):
     manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_manager")
     is_selected = models.BooleanField(default=False)
     is_declined = models.BooleanField(default=False)
-    accepted_at = models.DateTimeField(null=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
