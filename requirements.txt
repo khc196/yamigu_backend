@@ -1,4 +1,6 @@
 attrs==19.2.0
+CacheControl==0.12.5
+cachetools==3.1.1
 certifi==2019.6.16
 chardet==3.0.4
 coreapi==2.3.3
@@ -10,7 +12,20 @@ django-cors-headers==3.0.2
 django-rest-auth==0.9.5
 django-rest-framework==0.1.0
 djangorestframework==3.10.2
+djangorestframework-jwt==1.11.0
 drf-yasg==1.16.1
+firebase-admin==3.0.0
+google-api-core==1.14.3
+google-api-python-client==1.7.11
+google-auth==1.6.3
+google-auth-httplib2==0.0.3
+google-cloud-core==1.0.3
+google-cloud-firestore==1.4.0
+google-cloud-storage==1.20.0
+google-resumable-media==0.4.1
+googleapis-common-protos==1.6.0
+grpcio==1.24.1
+httplib2==0.14.0
 idna==2.8
 importlib-metadata==0.23
 inflection==0.3.1
@@ -19,8 +34,14 @@ Jinja2==2.10.1
 jsonschema==3.1.1
 MarkupSafe==1.1.1
 more-itertools==7.2.0
+msgpack==0.6.2
 oauthlib==3.0.2
 packaging==19.2
+pkg-resources==0.0.0
+protobuf==3.10.0
+pyasn1==0.4.7
+pyasn1-modules==0.2.7
+PyJWT==1.7.1
 pyparsing==2.4.2
 pyrsistent==0.15.4
 python3-openid==3.1.0
@@ -28,6 +49,7 @@ pytz==2019.2
 PyYAML==5.1.2
 requests==2.22.0
 requests-oauthlib==1.2.0
+rsa==4.0
 ruamel.yaml==0.16.5
 ruamel.yaml.clib==0.2.0
 six==1.12.0
@@ -35,4 +57,5 @@ sqlparse==0.3.0
 swagger-spec-validator==2.4.3
 uritemplate==3.0.0
 urllib3==1.25.3
+virtualenv==16.7.7
 zipp==0.6.0
