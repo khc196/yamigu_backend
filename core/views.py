@@ -3,6 +3,7 @@ from functools import reduce
 from django.db.models import Q, Prefetch
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
@@ -514,7 +515,7 @@ class PushNotificationView(APIView):
             devices = FCMDevice.objects.filter(user=user)
             devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
             return Response(status=status.HTTP_200_OK)
-        except MultiValueDictKeyError:
+        except MultiValueDictKeyError: 
             return JsonResponse({
                 'message': 'Bad Request',
                 'required_values': 'receiverId(FCM Token), message, clickAction', 
