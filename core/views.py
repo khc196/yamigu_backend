@@ -509,7 +509,8 @@ class FeedbackView(APIView):
 class PushNotificationView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        devices = FCMDevice.objects.filter(user=request.data['receiverId'])
+        user = User.objects.filter(uid=request.data['receiverId'])
+        devices = FCMDevice.objects.filter(user=user.id)
         devices.send_message(title=request.user.nickname, body=request.data['message'], data={"test": "test"})
         
         return Response(status=status.HTTP_200_OK)
