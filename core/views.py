@@ -509,9 +509,7 @@ class FeedbackView(APIView):
 class PushNotificationView(APIView):
     def post(self, request, *args, **kwargs):
         devices = FCMDevice.objects.all()
-        devices.send_message(title="Title", body="Message")
         devices.send_message(title="Title", body="Message", data={"test": "test"})
-        devices.send_message(data={"test": "test"})
         
         return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
