@@ -509,17 +509,17 @@ class FeedbackView(APIView):
 class PushNotificationView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
-        devices = FCMDevice.objects.filter(user=user)
-        if(request.data['receiverId'] == None or request.data['message'] == None or request.data['clickAction'] == None):
+        try:
+            user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
+            devices = FCMDevice.objects.filter(user=user)
+            devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
+            return Response(status=status.HTTP_200_OK)
+        except MultiValueDictKeyError:
             return JsonResponse({
                 'message': 'Bad Request',
                 'required_values': 'receiverId(FCM Token), message, clickAction', 
                 'code': 400
             })
-        devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
-        
-        return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()
