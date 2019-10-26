@@ -511,7 +511,13 @@ class PushNotificationView(APIView):
     def post(self, request, *args, **kwargs):
         user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
         devices = FCMDevice.objects.filter(user=user)
-        devices.send_message(title=request.user.nickname, body=request.data['message'], data={"test": "test"})
+        if(request.data['receiverId'] == None or request.data['message'] == None or request.data['clickAction'] == None):
+            return JsonResponse({
+                'message': 'Bad Request',
+                'required_values': 'receiverId(FCM Token), message, clickAction', 
+                'code': 400
+            })
+        devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
         
         return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
