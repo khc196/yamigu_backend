@@ -180,12 +180,15 @@ SWAGGER_SETTINGS = {
     'OPERATION_SORTER': None,
 }
 cred = credentials.Certificate(os.path.join(BASE_DIR, 'credentials.json'))
-default_app = firebase_admin.initialize_app(cred)
+try :
+	default_app = firebase_admin.initialize_app(cred)
+except ValueError:
+	pass
 
 FCM_DJANGO_SETTINGS = {
         "APP_VERBOSE_NAME": "com.yamigu.yamigu_app",
          # default: _('FCM Django')
-        "FCM_SERVER_KEY": env('FIREBASE_APIKEY'),
+        "FCM_SERVER_KEY": env('FCM_SERVER_KEY'),
          # true if you want to have only one active device per registered user at a time
          # default: False
         "ONE_DEVICE_PER_USER": False,
