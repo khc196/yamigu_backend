@@ -507,9 +507,10 @@ class FeedbackView(APIView):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PushNotificationView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        devices = FCMDevice.objects.all()
-        devices.send_message(title="Title", body="Message", data={"test": "test"})
+        devices = FCMDevice.objects.filter(user=request.data['receiverId'])
+        devices.send_message(title=request.user.nickname, body=request.data['message'], data={"test": "test"})
         
         return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
