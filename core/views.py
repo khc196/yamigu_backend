@@ -15,6 +15,7 @@ from authorization.models import User
 from datetime import datetime
 from .utils.pagination import MyPaginationMixin
 from fcm_django.models import FCMDevice
+import json
 
 class MeetingCreateView(APIView):
     """
@@ -516,11 +517,11 @@ class PushNotificationView(APIView):
             devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
             return Response(status=status.HTTP_200_OK)
         except MultiValueDictKeyError: 
-            return JsonResponse({
+            error_msg = json.dumps({
                 'message': 'Bad Request',
                 'required_values': 'receiverId(FCM Token), message, clickAction', 
-                'code': 400
             })
+            return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()
