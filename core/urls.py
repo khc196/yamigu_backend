@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import *
-
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
 api_urlpattern = [
     path('meetings/create/', MeetingCreateView.as_view()),
     path('meetings/edit/', MeetingEditView.as_view()),
@@ -20,4 +20,6 @@ api_urlpattern = [
 	path('matching/decline_request/', MeetingDeclineRequestMatchView.as_view()),
     path('meetings/rate/', RatingView.as_view()),
     path('meetings/feedback/', FeedbackView.as_view()),
+    path('fcm/register_device/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),
+    path('fcm/send_push/', PushNotificationView.as_view()),
 ]

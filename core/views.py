@@ -13,6 +13,7 @@ from .models import *
 from authorization.models import User
 from datetime import datetime
 from .utils.pagination import MyPaginationMixin
+from fcm_django.models import FCMDevice
 
 class MeetingCreateView(APIView):
     """
@@ -505,7 +506,14 @@ class FeedbackView(APIView):
         print(serializer.errors)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+class PushNotificationView(APIView):
+    def post(self, request, *args, **kwargs):
+        devices = FCMDevice.objects.all()
+        devices.send_message(title="Title", body="Message")
+        devices.send_message(title="Title", body="Message", data={"test": "test"})
+        devices.send_message(data={"test": "test"})
+        
+        return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()

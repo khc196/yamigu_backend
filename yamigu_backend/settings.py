@@ -13,7 +13,13 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import firebase_admin
 from firebase_admin import credentials
+import environ
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+environ.Env.read_env()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,10 +28,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'zs81=*i76^@-)#5#@y3z-i6t3z4s8v@mjx21#w%=4csf+*7b=9'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -50,9 +56,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-
-    #카카오
     'allauth.socialaccount.providers.kakao',
+    'fcm_django',
 ]
 
 MIDDLEWARE = [
@@ -176,3 +181,16 @@ SWAGGER_SETTINGS = {
 }
 cred = credentials.Certificate(os.path.join(BASE_DIR, 'credentials.json'))
 default_app = firebase_admin.initialize_app(cred)
+
+FCM_DJANGO_SETTINGS = {
+        "APP_VERBOSE_NAME": "com.yamigu.yamigu_app",
+         # default: _('FCM Django')
+        "FCM_SERVER_KEY": env('FIREBASE_APIKEY'),
+         # true if you want to have only one active device per registered user at a time
+         # default: False
+        "ONE_DEVICE_PER_USER": False,
+         # devices to which notifications cannot be sent,
+         # are deleted upon receiving error response from FCM
+         # default: False
+        "DELETE_INACTIVE_DEVICES": False,
+}
