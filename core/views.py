@@ -514,12 +514,13 @@ class PushNotificationView(APIView):
         try:
             user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
             devices = FCMDevice.objects.filter(user=user)
-            devices.send_message(title=request.user.nickname, body=request.data['message'], data={"clickAction": request.data['clickAction']})
+            #devices.send_message(title=request.user.nickname, body=request.data['message'], click_action=request.data['click_action'], data=json.loads(request.data['data']))
+            devices.send_message(data=json.loads(request.data['data']))
             return Response(status=status.HTTP_200_OK)
         except MultiValueDictKeyError: 
             error_msg = json.dumps({
                 'message': 'Bad Request',
-                'required_values': 'receiverId(FCM Token), message, clickAction', 
+                'required_values': 'receiverId(FCM Token), message, click_action, data' 
             })
             return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
 # class MeetingTypeView(APIView):
