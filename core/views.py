@@ -520,7 +520,7 @@ class PushNotificationView(APIView):
         except MultiValueDictKeyError: 
             error_msg = json.dumps({
                 'message': 'Bad Request',
-                'required_values': 'receiverId(FCM Token), message, click_action, data' 
+                'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intent_args)' 
             })
             return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
 # class MeetingTypeView(APIView):
