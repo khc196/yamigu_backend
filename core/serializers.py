@@ -67,7 +67,7 @@ class MatchRequestSerializer(ModelSerializer):
 	manager_uid = IntegerField(source='manager.uid', read_only=True)
 	class Meta:
 		model = MatchRequest
-		fields = ("id", "sender", "receiver", "manager_uid", "accepted_at", "created_at")
+		fields = ("id", "sender", "receiver", "manager", "manager_uid", "accepted_at", "created_at")
 class MatchRequestSenderSerializer(ModelSerializer):
     sender = MeetingSerializer()
     #receiver = MeetingSerializer()
