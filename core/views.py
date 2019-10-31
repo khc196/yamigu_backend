@@ -253,7 +253,7 @@ class MeetingSendRequestMatchView(APIView):
             - meeting_type: 미팅 타입
             - date: 날짜
             - place: 장소
-            - receiver: 신청 대상 미팅
+            - meeting_id: 신청 대상 미팅
         
     """
     permission = [IsAuthenticated]
@@ -328,6 +328,7 @@ class MeetingSendRequestMatchNewView(APIView):
             data2 = {
                 'sender': meeting.id,
                 'receiver': request.data['meeting_id'],
+                'manager': 26,
                 'is_selected': False
                 }
             serializer2 = MatchRequestSerializer(data=data2)
