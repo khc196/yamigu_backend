@@ -307,8 +307,8 @@ class MeetingSendRequestMatchNewView(APIView):
     def get_date_object(self, date_string):
         try:
             date_string = str(datetime.now().year) + " " + date_string 
-            print(date_string)
-            date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+            date_string = date_string.replace(" ", "")
+            date = datetime.strptime(date_string, "%Y%m월%d일").date()
             return date
         except:
             raise Http404
