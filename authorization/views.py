@@ -104,16 +104,25 @@ class ChangeNicknameView(APIView):
             - nickname: 변경할 닉네임
         
     """
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        user = User.objects.get(id=request.user.id)
-        user.nickname = request.data['nickname']
-        user.save()
-        return JsonResponse({
-            'code': 200,
-            'data': user.nickname
-        })
+    	user = User.objects.get(id=request.user.id)
+    	user.nickname = request.data['nickname']
+    	user.save()
+    	return JsonResponse({
+    		'code': 200,
+    		'data': user.nickname
+    	})
 
+class ChangeProfileImgView(APIView):
+	"""
+		프로필 사진 변경 API
+
+		---
+		# Body Schema
+			- 
+
+	"""
 class SignUpView(APIView):
     """
         회원가입 API
@@ -128,6 +137,7 @@ class SignUpView(APIView):
             - belong: 소속(학교 or 직장)
             - department: 부서(전공 or 팀)
             - age: 나이 
+            - cert_img: 소속 인증 사진
         
     """
     def post(Self, request, *args, **kwargs):
@@ -140,6 +150,7 @@ class SignUpView(APIView):
         user.belong = request.data['belong']
         user.department = request.data['department']
         user.age = request.data['age']
+        #user.cert_image = request.data['cert_img']
         user.save()
         return Response(data=None, status=status.HTTP_200_OK)
 class KakaoLoginView(SocialLoginView):

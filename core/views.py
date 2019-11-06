@@ -260,6 +260,7 @@ class MeetingSendRequestMatchView(APIView):
     def get_date_object(self, date_string):
         try:
             date_string = str(datetime.now().year) + date_string.strip()
+            date_string = date_string.replace(" ", "")
             date = datetime.strptime(date_string, "%Y%m월%d일").date()
             return date
         except:
@@ -306,41 +307,41 @@ class MeetingSendRequestMatchNewView(APIView):
     def get_date_object(self, date_string):
         try:
             date_string = str(datetime.now().year) + " " + date_string 
+            print(date_string)
             date = datetime.strptime(date_string, "%Y %m월 %d일").date()
             return date
         except:
             raise Http404
     def post(self, request, *args, **kwargs):
-        data = {
-                'openby': request.user.id,
-                'meeting_type': request.data['meeting_type'],
-                'date': self.get_date_object(request.data['date']),
-                'place_type': request.data['place'],
-                'appeal': request.data['appeal'],
-                'place': None,
-                'rating': None,
-                'is_matched': False,
-            }
-    
-        serializer = MeetingCreateSerializer(data=data)
-        if serializer.is_valid():
-            meeting = serializer.save()
-            data2 = {
-                'sender': meeting.id,
-                'receiver': request.data['meeting_id'],
-                'manager': 26,
-                'is_selected': False
-                }
-            serializer2 = MatchRequestSerializer(data=data2)
-            if serializer2.is_valid():
-                match = serializer2.save()
-                # TODO: push notification to receiver
-                return Response(data=match.id, status=status.HTTP_201_CREATED)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    	data = {
+    		'openby': request.user.id,
+    		'meeting_type': request.data['meeting_type'],
+    		'date': self.get_date_object(request.data['date']),
+    		'place_type': request.data['place'],
+    		'appeal': request.data['appeal'],
+    		'place': None,
+    		'rating': None,
+    		'is_matched': False,
+    	}
+    	serializer = MeetingCreateSerializer(data=data)
+    	if serializer.is_valid():
+    		meeting = serializer.save()
+    		data2 = {
+    			'sender': meeting.id,
+    			'receiver': request.data['meeting_id'],
+    			'manager': 26,
+    			'is_selected': False
+    		}
+    		serializer2 = MatchRequestSerializer(data=data2)
+    		if serializer2.is_valid():
+    			match = serializer2.save()
+    			# TODO: push notification to receiver
+    			return Response(data=match.id, status=status.HTTP_201_CREATED)
+    		return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingReceivedRequestMatchView(APIView):
     """
-         받은 매칭 신청 리스트 API
+        받은 매칭 신청 리스트 API
         
         ---
         # Body Schema
@@ -510,20 +511,51 @@ class FeedbackView(APIView):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PushNotificationView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        try:
-            user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
-            devices = FCMDevice.objects.filter(user=user)
-            #devices.send_message(title=request.user.nickname, body=request.data['message'], click_action=request.data['click_action'], data=json.loads(request.data['data']))
-            devices.send_message(data=json.loads(request.data['data']))
-            return Response(status=status.HTTP_200_OK)
-        except MultiValueDictKeyError: 
-            error_msg = json.dumps({
-                'message': 'Bad Request',
-                'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intentArgs)' 
-            })
-            return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
+	"""
+        Push Notification API
+        
+        ---
+        # Request Body Schema
+        	- receiverId: push notification 받을 대상 유저의 uid
+        	- data: 
+        		title: notification 제목
+        		content: notification 내용
+        		clickAction: click 시 열릴 activity의 이름(이름 앞에 .을 붙여야함)
+        		intentArgs:  각 Activity를 열기 전에 처리해줘야 할 데이터 목록
+        			ex) ChattingActivity의 경우
+        			partner_age: push를 보내는 유저의 나이(integer)
+        			partner_belong: push를 보내는 유저의 소속(string)
+        			partner_department: push를 보내는 유저의 학과/부서(string)
+        			partner_nickname: push를 보내는 유저의 닉네임(string)
+        			partner_uid: push를 보내는 유저의 uid(string)
+        			date: 미팅 날짜(%m월 %d일, string)
+        			place: 미팅 장소(string)
+        			type: 미팅 타입(string)
+        			meeting_id: 미팅 id(string)
+        			matching_id: 매칭 id(string)
+        			manager_name: 매니저 이름(string)
+        			manager_uid: 매니저 uid(string)
+        			accepted_at: 매칭 성사 시간(string)
+
+	"""
+	permission_classes = [IsAuthenticated]
+	def post(self, request, *args, **kwargs):
+		try:
+			user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
+			devices = FCMDevice.objects.filter(user=user)
+#devices.send_message(title=request.user.nickname, body=request.data['message'], click_action=request.data['click_action'], data=json.loads(request.data['data']))
+			print(request.data)
+			try:
+				devices.send_message(data=json.loads(request.data['data']))
+			except TypeError:
+				devices.send_message(data=request.data['data'])
+			return Response(status=status.HTTP_200_OK)
+		except MultiValueDictKeyError: 
+			error_msg = json.dumps({
+				'message': 'Bad Request',
+				'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intentArgs)' 
+			})
+			return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()
