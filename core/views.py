@@ -297,7 +297,7 @@ class MeetingSendRequestMatchNewView(APIView):
         ---
         # Body Schema
             - meeting_type: 미팅 타입
-            - date: 날짜
+            - date: 날짜(M월 M일)
             - place: 장소
             - appeal: 어필 문구
             - receiver: 신청 대상 미팅
