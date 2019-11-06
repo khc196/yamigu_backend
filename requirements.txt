@@ -9,11 +9,15 @@ defusedxml==0.6.0
 Django==2.2.3
 django-allauth==0.39.1
 django-cors-headers==3.0.2
+django-environ==0.4.5
 django-rest-auth==0.9.5
 django-rest-framework==0.1.0
+django-uuidfield==0.5.0
 djangorestframework==3.10.2
 djangorestframework-jwt==1.11.0
 drf-yasg==1.16.1
+environ==1.0
+fcm-django==0.3.2
 firebase-admin==3.0.0
 google-api-core==1.14.3
 google-api-python-client==1.7.11
@@ -39,6 +43,7 @@ packaging==19.2
 protobuf==3.10.0
 pyasn1==0.4.7
 pyasn1-modules==0.2.7
+pyfcm==1.4.7
 PyJWT==1.7.1
 pyparsing==2.4.2
 pyrsistent==0.15.4
