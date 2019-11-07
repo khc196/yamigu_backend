@@ -18,6 +18,7 @@ api_urlpattern = [
 	path('matching/cancel_request/', MeetingCancelRequestMatchView.as_view()),
 	path('matching/accept_request/', MeetingAcceptRequestMatchView.as_view()),
 	path('matching/decline_request/', MeetingDeclineRequestMatchView.as_view()),
+    path('matching/cancel_matching/', MeetingCancelMatchView.as_view()),
     path('meetings/rate/', RatingView.as_view()),
     path('meetings/feedback/', FeedbackView.as_view()),
     path('fcm/register_device/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),

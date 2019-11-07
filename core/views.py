@@ -199,7 +199,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
 
             if(len(selected_dates) == 0):
                 raise Http404
-            page = self.paginate_queryset(filtered_data.order_by("is_matched", "date"))
+            page = self.paginate_queryset(filtered_data.order_by("-is_matched", "date"))
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
                 #print(serializer.data)
@@ -452,6 +452,35 @@ class MeetingDeclineRequestMatchView(APIView):
             return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
+class MeetingCancelMatchView(APIView):
+    """
+        매칭 취소 API
+        
+        ---
+        # Body Schema
+            - match_id: 매칭 신청 id
+        
+    """
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match_request = get_object_or_404(MatchRequest, id=request.data['match_id'])
+        target_meeting = None
+
+        if(request.user.id == match_request.receiver.openby.id):
+            target_meeting = match_request.receiver
+        elif(request.user.id == match_request.sener.openby.id):
+            target_meeting == match_request.sender
+        else:
+            return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            match_request.is_canceled = True
+            match_request.save()
+            target_meeting.delete()
+            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+        except:
+            return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+
 class RatingView(APIView):
     """
         별점 평가 API
@@ -522,7 +551,7 @@ class PushNotificationView(APIView):
         		content: notification 내용
         		clickAction: click 시 열릴 activity의 이름(이름 앞에 .을 붙여야함)
         		intentArgs:  각 Activity를 열기 전에 처리해줘야 할 데이터 목록
-        			ex) ChattingActivity의 경우
+        			ex) ChattingActivity의 경우 
         			partner_age: push를 보내는 유저의 나이(integer)
         			partner_belong: push를 보내는 유저의 소속(string)
         			partner_department: push를 보내는 유저의 학과/부서(string)

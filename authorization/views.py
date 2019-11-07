@@ -14,6 +14,10 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
 
+import base64
+
+from io import StringIO
+from PIL import Image
 
 def pretty_request(request):
     headers = ''
@@ -73,6 +77,7 @@ class UserInfoView(APIView):
      			uid=uid,
      			display_name=user.nickname
      		)
+    
         queryset = User.objects.select_related().get(id=user.id)
         serializer = UserSerializer(queryset, many=False)
         return Response(serializer.data)
@@ -150,8 +155,40 @@ class SignUpView(APIView):
         user.belong = request.data['belong']
         user.department = request.data['department']
         user.age = request.data['age']
-        #user.cert_image = request.data['cert_img']
+        user.cert_image = request.data['cert_img']
         user.save()
         return Response(data=None, status=status.HTTP_200_OK)
 class KakaoLoginView(SocialLoginView):
     adapter_class = KakaoOAuth2Adapter
+
+
+class CertificateView(APIView):
+    """
+        소속 인증 API
+        
+        ---
+        # Body Schema
+            - image: 소속 인증 사진
+        
+    """
+    def post(Self, request, *args, **kwargs):
+        user = User.objects.select_related().get(id=request.user.id)
+        user.cert_image = base64.b64decode(request.data['image'])
+        user.save()
+        return Response(data=None, status=status.HTTP_200_OK)
+
+class ChangeAvataView(APIView):
+    """
+        프로필 사진 변경 API
+        
+        ---
+        # Body Schema
+            - image: 변경할 사진
+        
+    """
+    def post(Self, request, *args, **kwargs):
+        # user = User.objects.select_related().get(id=request.user.id)
+        # user.cert_image = base64.b64decode(request.data['image'])
+        # user.save()
+        return Response(data=None, status=status.HTTP_200_OK)
+
