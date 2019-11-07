@@ -16,8 +16,6 @@ from firebase_admin import auth
 
 import base64
 
-from io import StringIO
-from PIL import Image
 
 def pretty_request(request):
     headers = ''
