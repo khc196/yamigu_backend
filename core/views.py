@@ -540,8 +540,8 @@ class FeedbackView(APIView):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PushNotificationView(APIView):
-	"""
-        Push Notification API
+    """
+    Push Notification API
         
         ---
         # Request Body Schema
@@ -565,24 +565,27 @@ class PushNotificationView(APIView):
         			manager_name: 매니저 이름(string)
         			manager_uid: 매니저 uid(string)
         			accepted_at: 매칭 성사 시간(string)
-
-	"""
-	permission_classes = [IsAuthenticated]
-	def post(self, request, *args, **kwargs):
-		try:
-			user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
-			devices = FCMDevice.objects.filter(user=user)
-			try:
-				devices.send_message(data=json.loads(request.data['data']))
-			except TypeError:
-				devices.send_message(data=request.data['data'])
-			return Response(status=status.HTTP_200_OK)
-		except MultiValueDictKeyError: 
-			error_msg = json.dumps({
-				'message': 'Bad Request',
-				'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intentArgs)' 
-			})
-			return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        try:
+            user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
+            devices = FCMDevice.objects.filter(user=user)
+            try:
+                data=json.loads(request.data['data'])
+            except TypeError:
+                data=request.data['data']
+                if(devices[0].type == 'android'):
+                    devices.send_message(data=data)
+                else:
+                    devices.send_message(data=data, title=data['title'], body=data['content'])
+            return Response(status=status.HTTP_200_OK)
+        except MultiValueDictKeyError: 
+            error_msg = json.dumps({
+                'message': 'Bad Request',
+                'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intentArgs)' 
+            })
+            return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()
