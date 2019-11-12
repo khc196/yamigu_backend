@@ -8,7 +8,7 @@ from django.conf import settings
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
-
+from firebase_admin._auth_utils import UidAlreadyExistsError
 import os
 class UserManager(BaseUserManager):
     def create_user(self, name, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
@@ -74,6 +74,8 @@ class UserManager(BaseUserManager):
        		auth.create_user(uid=user.uid, photo_url=user.image)
        	except ValueError:
        		auth.create_user(uid=user.uid)
+        except UidAlreadyExistsError:
+            pass
         user.save(using=self._db)
         return user
 
