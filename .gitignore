@@ -7,3 +7,4 @@ tags
 credentials.json
 .env
 db.sqlite3
+media/*

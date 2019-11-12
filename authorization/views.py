@@ -5,6 +5,7 @@ from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticated
 
 from django.http import Http404, JsonResponse
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 
 from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
 from rest_auth.registration.views import SocialLoginView
@@ -16,7 +17,11 @@ from firebase_admin import auth
 
 import base64
 
+from core.utils.file_helper import save_uploaded_file
+from .tasks import async_image_upload
+from requests.exceptions import HTTPError
 
+from firebase_admin._auth_utils import UserNotFoundError
 def pretty_request(request):
     headers = ''
     for header, value in request.META.items():
@@ -61,9 +66,11 @@ class UserInfoView(APIView):
         user = request.user
         if user is None:
             return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+
         uid = user.uid
         user.firebase_token = create_token_uid(uid)
         user.save()
+
         try:
         	auth.update_user(
         		uid=uid,
@@ -75,6 +82,11 @@ class UserInfoView(APIView):
      			uid=uid,
      			display_name=user.nickname
      		)
+        except UserNotFoundError:
+            try:
+       		    auth.create_user(uid=user.uid, photo_url=user.image)
+       	    except ValueError:
+       		    auth.create_user(uid=user.uid)
     
         queryset = User.objects.select_related().get(id=user.id)
         serializer = UserSerializer(queryset, many=False)
@@ -153,7 +165,7 @@ class SignUpView(APIView):
         user.belong = request.data['belong']
         user.department = request.data['department']
         user.age = request.data['age']
-        user.cert_image = request.data['cert_img']
+        #user.cert_image = request.data['cert_img']
         user.save()
         return Response(data=None, status=status.HTTP_200_OK)
 class KakaoLoginView(SocialLoginView):
@@ -169,14 +181,21 @@ class CertificateView(APIView):
             - image: 소속 인증 사진
         
     """
+    permission_classes = [IsAuthenticated]
     def post(Self, request, *args, **kwargs):
-        user = User.objects.select_related().get(id=request.user.id)
-        user.cert_image = base64.b64decode(request.data['image'])
+        file_name = save_uploaded_file(request.data['uploaded_file'])
+        user = User.objects.get(id=request.user.id)
+        user.cert_image = "http://106.10.39.154:9999/media/"+file_name
         user.save()
+        print(file_name)
+        
+        #async_image_upload.delay(file_path, request.user.id, 'cert')
+
         return Response(data=None, status=status.HTTP_200_OK)
 
 class ChangeAvataView(APIView):
     """
+
         프로필 사진 변경 API
         
         ---
@@ -185,8 +204,11 @@ class ChangeAvataView(APIView):
         
     """
     def post(Self, request, *args, **kwargs):
-        # user = User.objects.select_related().get(id=request.user.id)
-        # user.cert_image = base64.b64decode(request.data['image'])
-        # user.save()
+        request_image = base64.b64decode(request.data['image'])
+        if type(request_image) not in (InMemoryUploadedFile, TemporaryUploadedFile):
+            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+        file_name = save_uploaded_file(request_image)
+        #async_image_upload.delay(file_path, request.user.id, 'profile')
+
         return Response(data=None, status=status.HTTP_200_OK)
 

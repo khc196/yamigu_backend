@@ -104,7 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    cert_image = models.FileField(blank=True, null=True)
+    cert_image = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     token = Token
     firebase_token= models.CharField(max_length=1000, null=True, unique=True)

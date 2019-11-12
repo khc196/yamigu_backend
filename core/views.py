@@ -572,8 +572,6 @@ class PushNotificationView(APIView):
 		try:
 			user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
 			devices = FCMDevice.objects.filter(user=user)
-#devices.send_message(title=request.user.nickname, body=request.data['message'], click_action=request.data['click_action'], data=json.loads(request.data['data']))
-			print(request.data)
 			try:
 				devices.send_message(data=json.loads(request.data['data']))
 			except TypeError:

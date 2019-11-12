@@ -11,4 +11,5 @@ api_urlpattern = [
     path('user/validation/nickname/<nickname>', NicknameValidator.as_view()),
     path('auth/signup/', SignUpView.as_view()),
     path('user/certificate/', CertificateView.as_view()),
+    path('user/change/avata/',  ChangeAvataView.as_view()),
 ]
