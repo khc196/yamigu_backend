@@ -178,7 +178,7 @@ class CertificateView(APIView):
         
         ---
         # Body Schema
-            - image: 소속 인증 사진
+            - uploaded_file: 소속 인증 사진
         
     """
     permission_classes = [IsAuthenticated]
@@ -187,7 +187,6 @@ class CertificateView(APIView):
         user = User.objects.get(id=request.user.id)
         user.cert_image = "http://106.10.39.154:9999/media/"+file_name
         user.save()
-        print(file_name)
         
         #async_image_upload.delay(file_path, request.user.id, 'cert')
 
@@ -200,7 +199,7 @@ class ChangeAvataView(APIView):
         
         ---
         # Body Schema
-            - image: 변경할 사진
+            - uploaded_file: 변경할 사진
         
     """
     def post(Self, request, *args, **kwargs):
