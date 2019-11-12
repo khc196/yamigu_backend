@@ -102,7 +102,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     age = models.IntegerField(blank=False, null=True)
     email = models.EmailField(max_length=70, blank=True)
     image = models.CharField(max_length=200,blank=True)
-    is_certified = models.BooleanField(default=False)
+    user_certified = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
