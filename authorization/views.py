@@ -186,6 +186,7 @@ class CertificateView(APIView):
         file_name = save_uploaded_file(request.data['uploaded_file'])
         user = User.objects.get(id=request.user.id)
         user.cert_image = "http://106.10.39.154:9999/media/"+file_name
+        user.user_certified = 1
         user.save()
         
         #async_image_upload.delay(file_path, request.user.id, 'cert')
