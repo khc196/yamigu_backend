@@ -73,9 +73,10 @@ class UserManager(BaseUserManager):
        	try:
        		auth.create_user(uid=user.uid, photo_url=user.image)
        	except ValueError:
-       		auth.create_user(uid=user.uid)
-        except UidAlreadyExistsError:
-            pass
+            try:
+       		    auth.create_user(uid=user.uid)
+            except UidAlreadyExistsError:
+                pass
         user.save(using=self._db)
         return user
 
