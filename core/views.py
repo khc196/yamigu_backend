@@ -199,7 +199,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
 
             if(len(selected_dates) == 0):
                 raise Http404
-            page = self.paginate_queryset(filtered_data.order_by("-is_matched", "date"))
+            page = self.paginate_queryset(filtered_data.order_by("is_matched", "date"))
             if page is not None:
                 serializer = self.serializer_class(page, many=True)
                 #print(serializer.data)
