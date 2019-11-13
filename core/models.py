@@ -71,8 +71,8 @@ class PlaceImage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class MatchRequest(models.Model):
-    receiver = models.ForeignKey(Meeting, on_delete=models.CASCADE, null=True, related_name="match_receiver")
-    sender = models.ForeignKey(Meeting, on_delete=models.CASCADE, null=True, related_name="match_sender")
+    receiver = models.ForeignKey(Meeting, on_delete=models.CASCADE, null=False, related_name="match_receiver")
+    sender = models.ForeignKey(Meeting, on_delete=models.CASCADE, null=False, related_name="match_sender")
     manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_manager")
     is_selected = models.BooleanField(default=False)
     is_declined = models.BooleanField(default=False)
