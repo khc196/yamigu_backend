@@ -464,22 +464,14 @@ class MeetingCancelMatchView(APIView):
     permission = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['match_id'])
-        target_meeting = None
-
-        if(request.user.id == match_request.receiver.openby.id):
-            target_meeting = match_request.receiver
-        elif(request.user.id == match_request.sener.openby.id):
-            target_meeting == match_request.sender
-        else:
-            return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
-        
+        match_id = match_request.id
         try:
-            match_request.is_canceled = True
-            match_request.save()
-            target_meeting.delete()
-            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+            match_request.sender.delete()
+            match_request.receiver.delete()
+            match_request.delete()
+            return Response(data=match_id, status=status.HTTP_202_ACCEPTED)
         except:
-            return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
 
 class RatingView(APIView):
     """

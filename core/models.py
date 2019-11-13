@@ -76,7 +76,6 @@ class MatchRequest(models.Model):
     manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="meeting_manager")
     is_selected = models.BooleanField(default=False)
     is_declined = models.BooleanField(default=False)
-    is_canceled = models.BooleanField(default=False)
     accepted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
