@@ -65,6 +65,8 @@ class UserManager(BaseUserManager):
         
         user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
         user.uid = str(extra_data['id'])
+        user.save(using=self._db)
+        print(str(extra_data['id']))
         try:
         	user.image = extra_data['properties']['profile_image']
         except KeyError:
@@ -72,6 +74,8 @@ class UserManager(BaseUserManager):
        	user.firebase_token = create_token_uid(str(extra_data['id']))
        	try:
        		auth.create_user(uid=user.uid, photo_url=user.image)
+       	except UidAlreadyExistsError:
+       		pass
        	except ValueError:
             try:
        		    auth.create_user(uid=user.uid)

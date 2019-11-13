@@ -281,6 +281,9 @@ class MeetingSendRequestMatchView(APIView):
             'manager': 5,
             'is_selected': False
             }
+        matches = MatchRequest.objects.all().filter(sender=data['sender'], receiver=data['receiver'])
+        if(matches.count() > 0):
+        	return Response("aleady exists", status=status.HTTP_400_BAD_REQUEST)
         serializer = MatchRequestSerializer(data=data)
         if serializer.is_valid():
             match = serializer.save()
