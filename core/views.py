@@ -289,7 +289,7 @@ class MeetingSendRequestMatchView(APIView):
                 'message': 'Created',
                 'code': 201
             })
-        return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingSendRequestMatchNewView(APIView):
     """
         매칭 신청(새로운 카드 생성) API
@@ -297,7 +297,7 @@ class MeetingSendRequestMatchNewView(APIView):
         ---
         # Body Schema
             - meeting_type: 미팅 타입
-            - date: 날짜(M월 M일)
+            - date: 날짜(%m월 %d일)
             - place: 장소
             - appeal: 어필 문구
             - receiver: 신청 대상 미팅
@@ -337,6 +337,7 @@ class MeetingSendRequestMatchNewView(APIView):
     			match = serializer2.save()
     			# TODO: push notification to receiver
     			return Response(data=match.id, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
     	return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingReceivedRequestMatchView(APIView):
