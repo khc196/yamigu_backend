@@ -278,7 +278,7 @@ class MeetingSendRequestMatchView(APIView):
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
-            'manager': 26,
+            'manager': 5,
             'is_selected': False
             }
         serializer = MatchRequestSerializer(data=data)
@@ -329,7 +329,7 @@ class MeetingSendRequestMatchNewView(APIView):
     		data2 = {
     			'sender': meeting.id,
     			'receiver': request.data['meeting_id'],
-    			'manager': 26,
+    			'manager': 5,
     			'is_selected': False
     		}
     		serializer2 = MatchRequestSerializer(data=data2)
