@@ -337,7 +337,6 @@ class MeetingSendRequestMatchNewView(APIView):
     			match = serializer2.save()
     			# TODO: push notification to receiver
     			return Response(data=match.id, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
     	return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingReceivedRequestMatchView(APIView):
