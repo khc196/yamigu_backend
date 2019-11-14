@@ -392,7 +392,6 @@ class MeetingAcceptRequestMatchView(APIView):
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
             match_request.accepted_at = datetime.now()
-            print((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
             sender = Meeting.objects.get(pk=match_request.sender.id)
             receiver = Meeting.objects.get(pk=match_request.receiver.id)
             sender.is_matched = True
