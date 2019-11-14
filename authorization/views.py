@@ -183,9 +183,10 @@ class CertificateView(APIView):
     """
     permission_classes = [IsAuthenticated]
     def post(Self, request, *args, **kwargs):
-        file_name = save_uploaded_file(request.data['uploaded_file'])
+        TAG = "cert"
+        file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
-        user.cert_image = "http://106.10.39.154:9999/media/"+file_name
+        user.cert_image = "http://106.10.39.154/:9999/media/"+TAG+"/"+file_name
         user.user_certified = 1
         user.save()
         
@@ -204,11 +205,12 @@ class ChangeAvataView(APIView):
         
     """
     def post(Self, request, *args, **kwargs):
-        request_image = base64.b64decode(request.data['image'])
-        if type(request_image) not in (InMemoryUploadedFile, TemporaryUploadedFile):
-            return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
-        file_name = save_uploaded_file(request_image)
-        #async_image_upload.delay(file_path, request.user.id, 'profile')
+        TAG="avata"
+        file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
+        user = User.objects.get(id=request.user.id)
+        user.cert_image = "http://106.10.39.154:9999/media/" + TAG + "/" + file_name
+        user.user_certified = 1
+        user.save()
 
         return Response(data=None, status=status.HTTP_200_OK)
 
