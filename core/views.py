@@ -283,15 +283,12 @@ class MeetingSendRequestMatchView(APIView):
             }
         matches = MatchRequest.objects.all().filter(sender=data['sender'], receiver=data['receiver'])
         if(matches.count() > 0):
-        	return Response("aleady exists", status=status.HTTP_400_BAD_REQUEST)
+        	return Response("aleady exists", status=status.HTTP_200_OK)
         serializer = MatchRequestSerializer(data=data)
         if serializer.is_valid():
             match = serializer.save()
             # TODO: push notification to receiver
-            return JsonResponse({
-                'message': 'Created',
-                'code': 201
-            })
+            return Response(status=status.HTTP_200_OK, data="created")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingSendRequestMatchNewView(APIView):
     """
@@ -395,6 +392,7 @@ class MeetingAcceptRequestMatchView(APIView):
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
             match_request.accepted_at = datetime.now()
+            print((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
             sender = Meeting.objects.get(pk=match_request.sender.id)
             receiver = Meeting.objects.get(pk=match_request.receiver.id)
             sender.is_matched = True

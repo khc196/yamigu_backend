@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from django.db.models import Q, Count
 from .models import *
 import time 
+from datetime import datetime
 class MeetingTypeSerializer(ModelSerializer):
     class Meta:
         model = MeetingType
@@ -41,13 +42,13 @@ class MeetingSerializer(ModelSerializer):
     def get_received_request_prefetch_related(self, meeting):
         match_request_queryset = meeting.match_receiver.all().order_by('created_at').filter(Q(is_declined=False))
         
-        data = [{'id': match_request.id,'is_selected': match_request.is_selected, 'sender': match_request.sender.id, 'receiver': match_request.receiver.id, 'manager_uid': match_request.manager.uid, 'manager_name': match_request.manager.nickname, 'manager_profile': match_request.manager.image, 'accepted_at': int(time.mktime(match_request.accepted_at.timetuple())) if match_request.accepted_at != None else None
+        data = [{'id': match_request.id,'is_selected': match_request.is_selected, 'sender': match_request.sender.id, 'receiver': match_request.receiver.id, 'manager_uid': match_request.manager.uid, 'manager_name': match_request.manager.nickname, 'manager_profile': match_request.manager.image, 'accepted_at': int((match_request.accepted_at.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) if match_request.accepted_at != None else None
 } for match_request in match_request_queryset]
        	return_data = { 'count': match_request_queryset.count(), 'data': data}
        	return return_data
     def get_sent_request_prefetch_related(self, meeting):
         match_request_queryset = meeting.match_sender.all().order_by('created_at').filter(Q(is_declined=False))
-        data = [{'id': match_request.id,'is_selected': match_request.is_selected,  'sender': match_request.sender.id, 'receiver': match_request.receiver.id, 'manager_uid': match_request.manager.uid, 'manager_name': match_request.manager.nickname, 'manager_profile': match_request.manager.image, 'accepted_at': int(time.mktime(match_request.accepted_at.timetuple())) if match_request.accepted_at != None else None} for match_request in match_request_queryset]
+        data = [{'id': match_request.id,'is_selected': match_request.is_selected,  'sender': match_request.sender.id, 'receiver': match_request.receiver.id, 'manager_uid': match_request.manager.uid, 'manager_name': match_request.manager.nickname, 'manager_profile': match_request.manager.image, 'accepted_at': int((match_request.accepted_at.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) if match_request.accepted_at != None else None} for match_request in match_request_queryset]
        	return_data = { 'count': match_request_queryset.count(), 'data': data}
        	return return_data     
     class Meta:
