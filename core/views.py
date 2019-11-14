@@ -160,7 +160,7 @@ class TodayMeetingListView(APIView):
 	def get(self, request, *args, **kwargs):
 		try:
 			now=datetime.today()
-			queryset = Meeting.objects.filter(is_matched=False, date=now).filter(~Q(openby=request.user.id))
+			queryset = Meeting.objects.filter(is_matched=True, date=now).filter(~Q(openby=request.user.id))
 			serializer = MeetingSerializer(queryset, many=True)
 			return Response(serializer.data)
 		except Meeting.DoesNotExist as e:
@@ -264,17 +264,15 @@ class MeetingSendRequestMatchView(APIView):
             date = datetime.strptime(date_string, "%Y%m월%d일").date()
             return date
         except:
-            raise JsonResponse({
+            raise JsonResponse(data={
             'message': 'Invalid date format', 
-            'code': 404
-        })
+        }, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, *args, **kwargs):
         prev_meeting = Meeting.objects.filter(openby=request.user.id, meeting_type=request.data['meeting_type'], date=self.get_date_object(request.data['date']), place_type=request.data['place'])
         if(prev_meeting.count() == 0) :
-            return JsonResponse({
+            return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
-                'code': 204
-        })
+        }, status=status.HTTP_200_OK)
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
@@ -283,7 +281,9 @@ class MeetingSendRequestMatchView(APIView):
             }
         matches = MatchRequest.objects.all().filter(sender=data['sender'], receiver=data['receiver'])
         if(matches.count() > 0):
-        	return Response("aleady exists", status=status.HTTP_200_OK)
+        	return JsonResponse(data={
+        		'message': 'aleady exists',
+			},status=status.HTTP_200_OK)
         serializer = MatchRequestSerializer(data=data)
         if serializer.is_valid():
             match = serializer.save()
