@@ -52,7 +52,7 @@ class MeetingCreateView(APIView):
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
-            return Response(data=meeting.id, status=status.HTTP_201_CREATED)
+            return Response(data=meeting.id, status=status.HTTP_200_OK)
         print(serializer.errors)
        
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -108,7 +108,7 @@ class MeetingDeleteView(APIView):
     def post(self, request, *args, **kwargs):
         meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
         meeting.delete()
-        return Response(data=meeting.id, status=status.HTTP_204_NO_CONTENT)
+        return Response(data=meeting.id, status=status.HTTP_200_OK)
 
 class MyMeetingListView(APIView):
     """
@@ -270,15 +270,21 @@ class MeetingSendRequestMatchView(APIView):
             'message': 'Invalid date format', 
         }, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, *args, **kwargs):
-        prev_meeting = Meeting.objects.filter(openby=request.user.id, meeting_type=request.data['meeting_type'], date=self.get_date_object(request.data['date']), place_type=request.data['place'])
+        target_meeting = Meeting.objects.get(pk=request.data['meeting_id'])
+        if(int(request.data['meeting_type']) != target_meeting.meeting_type.id):
+            print("different type")
+            return JsonResponse(data={
+                'message': 'different type', 
+        }, status=status.HTTP_200_OK)
+        prev_meeting = Meeting.objects.filter(openby=request.user.id, date=self.get_date_object(request.data['date']))
         if(prev_meeting.count() == 0) :
             return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
-        }, status=status.HTTP_204_NO_CONTENT)
+        }, status=status.HTTP_200_OK)
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
-            'manager': 5,
+            'manager': 26,
             'is_selected': False
             }
         matches = MatchRequest.objects.all().filter(sender=data['sender'], receiver=data['receiver'])
@@ -286,16 +292,19 @@ class MeetingSendRequestMatchView(APIView):
         if(matches.count() > 0):
         	return JsonResponse(data={
         		'message': 'aleady exists',
-			},status=status.HTTP_204_NO_CONTENT)
+			},status=status.HTTP_200_OK)
          
         serializer = MatchRequestSerializer(data=data)
         if serializer.is_valid():
             match = serializer.save()
             #TODO: Push notification & Firebase DB notification (to Receiver)
-            receiver_user_id = data['receiver']
-            month = prev_meeting.date.month
-            day = prev_meeting.date.day
-            notification_content = month+"/"+day+" 미팅 신청이 들어왔어요!"
+            receiver = Meeting.objects.get(pk=data['receiver'])
+            receiver_user_id = receiver.openby.id
+            receiver_user_uid = receiver.openby.uid
+            month = prev_meeting[0].date.month
+            day = prev_meeting[0].date.day
+            notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
+            print(notification_content)
             notification_data = ""
             push_data = {
                 'title': "야미구",
@@ -304,8 +313,11 @@ class MeetingSendRequestMatchView(APIView):
                 'intentArgs': ""
             }
             firebase_message.send_push(receiver_user_id, push_data)
-            firebase_message.send_notification(receiver_user_id, 1, notification_content, notification_data)
-            return Response(status=status.HTTP_200_OK, data="created")
+            firebase_message.send_notification(receiver_user_uid, 1, notification_content, notification_data)
+            return Response(status=status.HTTP_200_OK, data={
+                "message": "created"
+            })
+        print(serializer.errors)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class MeetingSendRequestMatchNewView(APIView):
     """
@@ -330,7 +342,7 @@ class MeetingSendRequestMatchNewView(APIView):
         except:
             raise Http404
     def post(self, request, *args, **kwargs):
-    	data = {
+        data = {
     		'openby': request.user.id,
     		'meeting_type': request.data['meeting_type'],
     		'date': self.get_date_object(request.data['date']),
@@ -340,34 +352,37 @@ class MeetingSendRequestMatchNewView(APIView):
     		'rating': None,
     		'is_matched': False,
     	}
-    	serializer = MeetingCreateSerializer(data=data)
-    	if serializer.is_valid():
-    		meeting = serializer.save()
-    		data2 = {
+        serializer = MeetingCreateSerializer(data=data)
+        if serializer.is_valid():
+            meeting = serializer.save()
+            data2 = {
     			'sender': meeting.id,
     			'receiver': request.data['meeting_id'],
-    			'manager': 5,
+    			'manager': 26,
     			'is_selected': False
     		}
-    		serializer2 = MatchRequestSerializer(data=data2)
-    		if serializer2.is_valid():
-    			match = serializer2.save()
-    			#TODO: Push notification & Firebase DB notification (to Receiver)
-                receiver_user_id = meeting.openby
+            serializer2 = MatchRequestSerializer(data=data2)
+            if serializer2.is_valid():
+                match = serializer2.save()
+                #TODO: Push notification & Firebase DB notification (to Receiver)
+                receiver_user_id = meeting.openby.id
+                receiver_user_uid = meeting.openby.uid
                 month = meeting.date.month
                 day = meeting.date.day
-                notification_content = month+"/"+day+" 미팅 신청이 들어왔어요!"
+                notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
+                print(notification_content)
                 notification_data = ""
                 push_data = {
                     'title': "야미구",
                     'content': notification_content,
                     'clickAction': ".NotificationActivity",
                     'intentArgs': ""
-                }
+                    }
                 firebase_message.send_push(receiver_user_id, push_data)
-                firebase_message.send_notification(receiver_user_id, 1, notification_content, notification_data)
-                return Response(data=match.id, status=status.HTTP_201_CREATED)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                firebase_message.send_notification(receiver_user_uid, 1, notification_content, notification_data)
+                return Response(data=match.id, status=status.HTTP_200_CREATED)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingReceivedRequestMatchView(APIView):
     """
@@ -435,7 +450,7 @@ class MeetingAcceptRequestMatchView(APIView):
             #TODO: Push notification & Firebase DB notification
             month = receiver.date.month
             day = receiver.date.day
-            notification_content = month+"/"+day+" 미팅 매칭이 완료되었어요!"
+            notification_content = "{}/{} 미팅 매칭이 완료되었어요!".format(month, day)
             notification_data = ""
             push_data = {
                 'title': "야미구",
@@ -443,16 +458,17 @@ class MeetingAcceptRequestMatchView(APIView):
                 'clickAction': ".NotificationActivity",
                 'intentArgs': ""
             }
-            sender_user_id = sender.openby
+            sender_user_id = sender.openby.id
+            sender_user_uid = sender.openby.uid
             firebase_message.send_push(sender_user_id, push_data)
-            firebase_message.send_notification(sender_user_id, 2, notification_content, notification_data)
+            firebase_message.send_notification(sender_user_uid, 2, notification_content, notification_data)
             return JsonResponse(data={
                 'data': {
                     'match_id': match_request.id,
                     'count_meeting': count_meeting,
                     'message': "Accepted"
                 },
-            }, status=status.HTTP_202_ACCEPTED)
+            }, status=status.HTTP_200_OK)
             
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
@@ -472,7 +488,7 @@ class MeetingCancelRequestMatchView(APIView):
         sender_user_id = match_request.sender.openby.id
         if request.user.id == sender_user_id:
             match_request.delete()
-            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+            return Response(data=match_request.id, status=status.HTTP_200_OK)
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingDeclineRequestMatchView(APIView):
@@ -489,13 +505,14 @@ class MeetingDeclineRequestMatchView(APIView):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
         receiver_user_id = match_request.receiver.openby.id
         sender_user_id = match_request.sender.openby.id
+        sender_user_uid = match_request.sender.openby.uid
         if request.user.id == receiver_user_id:
             match_request.is_declined = True
             match_request.save()
             #TODO: Push notification & Firebase DB notification (to Sender)
             month = match_request.receiver.date.month
             day = match_request.receiver.day.day
-            notification_content = month+"/"+day+" 미팅 신청이 거절되었어요!"
+            notification_content = "{}/{} 미팅 신청이 거절되었어요!".format(month, day)
             notification_data = ""
             push_data = {
                 'title': "야미구",
@@ -504,8 +521,8 @@ class MeetingDeclineRequestMatchView(APIView):
                 'intentArgs': ""
             }
             firebase_message.send_push(sender_user_id, push_data)
-            firebase_message.send_notification(sender_user_id, 3, notification_content, notification_data)
-            return Response(data=match_request.id, status=status.HTTP_202_ACCEPTED)
+            firebase_message.send_notification(sender_user_uid, 3, notification_content, notification_data)
+            return Response(data=match_request.id, status=status.HTTP_200_OK)
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
 class MeetingCancelMatchView(APIView):
@@ -521,7 +538,7 @@ class MeetingCancelMatchView(APIView):
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['match_id'])
         match_id = match_request.id
-        partner_id = match_request.sender.openby if match_request.sender.openby == request.user.id else match_request.receiver.openby
+        partner = match_request.sender.openby if match_request.sender.openby.id == request.user.id else match_request.receiver.openby
         try:
             match_request.sender.delete()
             match_request.receiver.delete()
@@ -535,9 +552,10 @@ class MeetingCancelMatchView(APIView):
                 'clickAction': ".NotificationActivity",
                 'intentArgs': ""
             }
-            firebase_message.send_push(partner_id, push_data)
-            firebase_message.send_notification(partner_id, 6, notification_content, notification_data)
-            return Response(data=match_id, status=status.HTTP_202_ACCEPTED)
+        
+            firebase_message.send_push(partner.id, push_data)
+            firebase_message.send_notification(partner.uid, 6, notification_content, notification_data)
+            return Response(data=match_id, status=status.HTTP_200_OK)
         except:
             return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
 
@@ -565,7 +583,7 @@ class RatingView(APIView):
         if serializer.is_valid():
             rating = serializer.save()
             meeting.update(rating=rating)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_200_OK)
         #print(serializer.errors)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

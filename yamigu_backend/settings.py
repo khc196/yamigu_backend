@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, db
 import environ
 
 env = environ.Env(
@@ -176,7 +176,7 @@ SWAGGER_SETTINGS = {
 }
 cred = credentials.Certificate(os.path.join(BASE_DIR, 'credentials.json'))
 try :
-	default_app = firebase_admin.initialize_app(cred)
+	default_app = firebase_admin.initialize_app(cred,  {'databaseURL': env('FIREBASE_DB_URL')})
 except ValueError:
 	pass
 
