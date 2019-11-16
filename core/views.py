@@ -4,6 +4,7 @@ from django.db.models import Q, Prefetch
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
+from django.conf import settings
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
@@ -17,6 +18,7 @@ from .utils.pagination import MyPaginationMixin
 from fcm_django.models import FCMDevice
 from core.utils import firebase_message
 import json
+
 
 
 class MeetingCreateView(APIView):
@@ -284,7 +286,7 @@ class MeetingSendRequestMatchView(APIView):
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
-            'manager': 26,
+            'manager': settings.MANAGER_ID,
             'is_selected': False
             }
         matches = MatchRequest.objects.all().filter(sender=data['sender'], receiver=data['receiver'])
@@ -358,7 +360,7 @@ class MeetingSendRequestMatchNewView(APIView):
             data2 = {
     			'sender': meeting.id,
     			'receiver': request.data['meeting_id'],
-    			'manager': 26,
+    			'manager': settings.MANAGER_ID,
     			'is_selected': False
     		}
             serializer2 = MatchRequestSerializer(data=data2)

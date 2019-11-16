@@ -13,7 +13,6 @@ def send_push(user_id, data):
             device.send_message(data=data, title=data['title'], body=data['content'])
             
 def send_notification(uid, notification_type, content, data):
-    print(uid)
     ref = db.reference('user/{}/notifications'.format(uid))
     key = ref.push().key
     ref.child(key).set({
