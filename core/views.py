@@ -367,8 +367,9 @@ class MeetingSendRequestMatchNewView(APIView):
             if serializer2.is_valid():
                 match = serializer2.save()
                 #TODO: Push notification & Firebase DB notification (to Receiver)
-                receiver_user_id = meeting.openby.id
-                receiver_user_uid = meeting.openby.uid
+                receiver = Meeting.objects.get(pk=request.data['meeting_id'])
+                receiver_user_id = receiver.openby.id
+                receiver_user_uid = receiver.openby.uid
                 month = meeting.date.month
                 day = meeting.date.day
                 notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
@@ -382,7 +383,7 @@ class MeetingSendRequestMatchNewView(APIView):
                     }
                 firebase_message.send_push(receiver_user_id, push_data)
                 firebase_message.send_notification(receiver_user_uid, 1, notification_content, notification_data)
-                return Response(data=match.id, status=status.HTTP_200_CREATED)
+                return Response(data=match.id, status=status.HTTP_200_OK)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
