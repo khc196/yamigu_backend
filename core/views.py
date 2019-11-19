@@ -665,6 +665,21 @@ class PushNotificationView(APIView):
                 'required_values': 'receiverId(FCM Token), data(title, content, clickAction(activity name), intentArgs)' 
             })
             return Response(data=error_msg, status=status.HTTP_400_BAD_REQUEST) 
+class RecommendationMeetingListView(APIView):
+    """
+        추천 미팅 리스트 API
+        
+        ---
+        
+    """
+    permission_class = [IsAuthenticated]
+    def get(Self, request, *args, **kwargs):
+        meetings = MeetingType.objects.all().filter(~Q(openby=request.user)).filter(~Q(is_matched=false)).filter(date__gte=now).order_by('date')
+        meetings = meetings[:5]
+        serializer = MeetingSerializer(meetings, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()
