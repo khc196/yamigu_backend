@@ -182,7 +182,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             - minimum_age: 최소 나이(0~11, 0부터 20살, 11은 31세 이상)
             - maximum_age: 최대 나이(0~11)
         # Example
-            - https://106.10.39.154:9999/api/meetings/?date=2019-10-11&date=2019-10-12&type=1&place=1&place=2&place=3
+            - https://106.10.39.154:9999/api/meetings/waiting/?date=2019-10-11&date=2019-10-12&type=1&place=1&place=2&place=3
         
     """
     pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
@@ -196,11 +196,29 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
             maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
             #print(request.user.id)
+
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
+            
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
             if(maximum_age < 11):
-	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
-
+                filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
+            my_meetings = Meeting.objects.filter(openby__id=request.user.id)
+            #print(meeting_id_list)
+            for data in filtered_data:
+                for match in data.match_receiver.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        filtered_data = filtered_data.exclude(id=data.id)
+                for match in data.match_sender.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        filtered_data = filtered_data.exclude(id=data.id)
+                
+            #filtered_data = filtered_data.exclude(
+            #    match_receiver__receiver__id__in=my_meetings
+            #)
+            #filtered_data = filtered_data.exclude(
+            #    match_sender__sender__id__in=my_meetings
+            #)
+            #print(filtered_data.all())
             if(len(selected_dates) == 0):
                 raise Http404
             page = self.paginate_queryset(filtered_data.order_by("is_matched", "date"))
@@ -676,7 +694,7 @@ class RecommendationMeetingListView(APIView):
     def get(Self, request, *args, **kwargs):
         now=datetime.today()
         meetings = Meeting.objects.all().filter(~Q(openby=request.user.id)).filter(~Q(is_matched=False)).filter(date__gte=now).order_by('date')
-        meetings = meetings[:5]
+        meetings = meetings[:5] 
         serializer = MeetingSerializer(meetings, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
