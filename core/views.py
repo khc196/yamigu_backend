@@ -203,7 +203,6 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             if(maximum_age < 11):
                 filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
             my_meetings = Meeting.objects.filter(openby__id=request.user.id)
-            #print(meeting_id_list)
             for data in filtered_data:
                 for match in data.match_receiver.all():
                     if match.sender in my_meetings or match.receiver in my_meetings:
@@ -261,6 +260,18 @@ class WaitingMeetingListNumberView(APIView):
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
             if(maximum_age < 11):
 	            filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
+            my_meetings = Meeting.objects.filter(openby__id=request.user.id)
+            for data in filtered_data:
+                for match in data.match_receiver.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        filtered_data = filtered_data.exclude(id=data.id)
+                for match in data.match_sender.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        filtered_data = filtered_data.exclude(id=data.id)
+                for mine in my_meetings:
+                    if data.date == mine.date and data.meeting_type == mine.meeting_type:
+                        filtered_data = filtered_data.exclude(id=data.id)
+            filtered_data = filtered_data.exclude(is_matched=True)
             count = filtered_data.count()
 
             return JsonResponse(data={
