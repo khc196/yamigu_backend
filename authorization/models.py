@@ -119,4 +119,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'name'
     def __str__(self):
-        return str(self.id)
+        return "%s" % (self.name)
