@@ -633,6 +633,7 @@ class FeedbackView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         
+        meeting = Meeting.objects.filter(id=request.data['meeting_id']).prefetch_related('rating')
         data = {
             'description': request.data['feedback'],
         }
