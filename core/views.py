@@ -211,7 +211,9 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
                 for match in data.match_sender.all():
                     if match.sender in my_meetings or match.receiver in my_meetings:
                         filtered_data = filtered_data.exclude(id=data.id)
-                
+                for mine in my_meetings:
+                    if data.date == mine.date and data.meeting_type == mine.meeting_type:
+                        filtered_data = filtered_data.exclude(id=data.id)
             #filtered_data = filtered_data.exclude(
             #    match_receiver__receiver__id__in=my_meetings
             #)
