@@ -27,14 +27,12 @@ class Place(models.Model):
 
 
 class Rating(models.Model):
-    visual = models.IntegerField()
-    fun = models.IntegerField()
-    manner = models.IntegerField()
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "(%d, %d, %d)" % (self.visual, self.fun, self.manner)
+        return "(%s)" % (self.description)
+        
 class Meeting(models.Model):
     meeting_type = models.ForeignKey(MeetingType, on_delete=models.CASCADE, null=True)
     openby = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, related_name="meeting_openby")

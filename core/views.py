@@ -593,33 +593,33 @@ class MeetingCancelMatchView(APIView):
         except:
             return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
 
-class RatingView(APIView):
-    """
-        별점 평가 API
+# class RatingView(APIView):
+#     """
+#         별점 평가 API
 
-        ---
-        # Request Body Schema
-            - meeting_id: 해당 미팅 id
-            - visual: visual 점수
-            - fun: fun 점수
-            - manner: manner 점수
-    """
-    permission_classes = [IsAuthenticated]
-    def post(self, request, *args, **kwargs):
-        data = {
-            'visual': request.data['visual'],
-            'fun': request.data['fun'],
-            'manner': request.data['manner']
-        }
-        meeting = Meeting.objects.filter(id=request.data['meeting_id']) 
-        rating = meeting.values("rating")[0]['rating']
-        serializer = RatingSerializer(data=data)
-        if serializer.is_valid():
-            rating = serializer.save()
-            meeting.update(rating=rating)
-            return Response(status=status.HTTP_200_OK)
-        #print(serializer.errors)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         ---
+#         # Request Body Schema
+#             - meeting_id: 해당 미팅 id
+#             - visual: visual 점수
+#             - fun: fun 점수
+#             - manner: manner 점수
+#     """
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request, *args, **kwargs):
+#         data = {
+#             'visual': request.data['visual'],
+#             'fun': request.data['fun'],
+#             'manner': request.data['manner']
+#         }
+#         meeting = Meeting.objects.filter(id=request.data['meeting_id']) 
+#         rating = meeting.values("rating")[0]['rating']
+#         serializer = RatingSerializer(data=data)
+#         if serializer.is_valid():
+#             rating = serializer.save()
+#             meeting.update(rating=rating)
+#             return Response(status=status.HTTP_200_OK)
+#         #print(serializer.errors)
+#         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FeedbackView(APIView):
     """
@@ -633,17 +633,10 @@ class FeedbackView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         
-        meeting = Meeting.objects.filter(id=request.data['meeting_id']).prefetch_related('rating')
-
-        rating =meeting[0].rating
         data = {
-            'id': rating.id,
-            'visual': rating.visual,
-            'fun': rating.fun,
-            'manner': rating.manner,
             'description': request.data['feedback'],
         }
-        serializer = RatingSerializer(rating, data=data)
+        serializer = RatingSerializer(data=data)
         if serializer.is_valid():
             rating = serializer.save()
             meeting.update(rating=rating)
