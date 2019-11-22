@@ -121,7 +121,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         real_name = ''
         nickname = ''
-        age = ''
+        age = 0
         gender = ''
         if(self.real_name):
             real_name = self.real_name
