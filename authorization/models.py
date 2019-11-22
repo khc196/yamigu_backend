@@ -121,4 +121,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         real_name = ''
         nickname = ''
-        return "%s" % (self.name)
+        age = ''
+        gender = ''
+        if(self.real_name):
+            real_name = self.real_name
+        if(self.nickname):
+            nickname = self.nickname
+        if(self.age):
+            age = self.age
+        if(self.gender == 1):
+            gender = '남'
+        elif(self.gender == 2):
+            gender = '여'
+        return "%s(%s, %s, %d)" % (nickname, real_name, gender, age)
