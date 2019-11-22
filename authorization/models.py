@@ -105,7 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     belong = models.CharField(blank=False, max_length=20, null=True)
     department = models.CharField(blank=False, max_length=20, null=True)
     age = models.IntegerField(blank=False, null=True)
-    email = models.EmailFie ld(max_length=70, blank=True)
+    email = models.EmailField(max_length=70, blank=True)
     image = models.CharField(max_length=200,blank=True)
     user_certified = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -121,5 +121,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         real_name = ''
         nickname = ''
-        
         return "%s" % (self.name)
