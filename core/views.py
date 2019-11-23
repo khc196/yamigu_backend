@@ -542,11 +542,14 @@ class MeetingDeclineRequestMatchView(APIView):
         sender_user_id = match_request.sender.openby.id
         sender_user_uid = match_request.sender.openby.uid
         if request.user.id == receiver_user_id:
-            match_request.is_declined = True
-            match_request.save()
+            #match_request.is_declined = True
+            #match_request.save()
+            
+
             #TODO: Push notification & Firebase DB notification (to Sender)
             month = match_request.receiver.date.month
             day = match_request.receiver.day.day
+            match_request.delete()
             notification_content = "{}/{} 미팅 신청이 거절되었어요!".format(month, day)
             notification_data = ""
             push_data = {
