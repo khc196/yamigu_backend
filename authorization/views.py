@@ -101,14 +101,19 @@ class NicknameValidator(APIView):
     #permission_classes = [IsAuthenticated]
     def get(self, request, nickname):
     
-        if(not nickname or User.objects.filter(nickname=nickname).exists()):
+        try: 
+            if(not nickname or User.objects.filter(nickname=nickname).exists()):
+                return JsonResponse({
+                    "is_available": False
+                }, status=status.HTTP_200_OK)
+            else:
+                return JsonResponse({
+                    "is_available": True
+                })
+        except User.DoesNotExist:
             return JsonResponse({
                 "is_available": False
-            })
-        else:
-            return JsonResponse({
-                "is_available": True
-            })
+            }, status=status.HTTP_200_OK)
 
 class ChangeNicknameView(APIView):
     """
