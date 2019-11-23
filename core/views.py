@@ -548,7 +548,7 @@ class MeetingDeclineRequestMatchView(APIView):
 
             #TODO: Push notification & Firebase DB notification (to Sender)
             month = match_request.receiver.date.month
-            day = match_request.receiver.day.day
+            day = match_request.receiver.date.day
             match_request.delete()
             notification_content = "{}/{} 미팅 신청이 거절되었어요!".format(month, day)
             notification_data = ""
