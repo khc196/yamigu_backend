@@ -701,7 +701,7 @@ class RecommendationMeetingListView(APIView):
     permission_class = [IsAuthenticated]
     def get(Self, request, *args, **kwargs):
         now=datetime.today()
-        meetings = Meeting.objects.all().filter(~Q(openby=request.user.id)).filter(~Q(is_matched=False)).filter(date__gte=now).order_by('date')
+        meetings = Meeting.objects.all().filter(~Q(openby=request.user.id)).filter(is_matched=False).filter(date__gte=now).order_by('date')
         meetings = meetings[:5] 
         serializer = MeetingSerializer(meetings, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
