@@ -134,15 +134,6 @@ class ChangeNicknameView(APIView):
     		'data': user.nickname
     	})
 
-class ChangeProfileImgView(APIView):
-	"""
-		프로필 사진 변경 API
-
-		---
-		# Body Schema
-			- 
-
-	"""
 class SignUpView(APIView):
     """
         회원가입 API
@@ -189,7 +180,6 @@ class CertificateView(APIView):
     permission_classes = [IsAuthenticated]
     def post(Self, request, *args, **kwargs):
         TAG = "cert"
-        print(request)
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
         user.cert_image = "http://106.10.39.154/9999/media/"+TAG+"/"+file_name
