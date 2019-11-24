@@ -178,7 +178,7 @@ class CertificateView(APIView):
         
     """
     permission_classes = [IsAuthenticated]
-    def post(Self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         TAG = "cert"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
@@ -200,7 +200,7 @@ class ChangeAvataView(APIView):
             - uploaded_file: 변경할 사진
         
     """
-    def post(Self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         TAG="avata"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
@@ -209,3 +209,26 @@ class ChangeAvataView(APIView):
 
         return Response(data=None, status=status.HTTP_200_OK)
 
+class BuyTicketView(APIView):
+    """
+        티켓 구매 API
+
+        ---
+        # Body Schema
+            - device: android or ios
+            - purchase_token: 구글 혹은 애플에 구매 여부 확인 가능한 구매 토큰
+            - purchase_number: 구매 티켓 개수
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        device_type = request.data["device"]
+        purchase_token = request.data["purchase_token"]
+        purchase_number = request.data["purchase_number"]
+        print("device_type: ", device_type)
+        print("purchase_token: ", purchase_token)
+        print("purchase_number: ", purchase_number)
+
+        user = User.objects.get(id=request.user.id)
+        user.ticket = user.ticket + purchase_number
+        return Response(data=None, status=status.HTTP_200_OK)
