@@ -258,4 +258,5 @@ class BuyTicketView(APIView):
         user = User.objects.get(id=request.user.id)
         user.ticket = user.ticket + purchase_number
         
+
         return Response(data=None, status=status.HTTP_200_OK)
