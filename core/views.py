@@ -467,6 +467,15 @@ class MeetingAcceptRequestMatchView(APIView):
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
         receiver_user_id = match_request.receiver.openby.id
+        if request.sender.is_matched or request.receiver.is_matched:
+            match_id = match_request.id
+            match_request.delete()
+            return JsonResponse(data={
+                'data': {
+                    'match_id': match_id,
+                    'message': "Duplicated"
+                },
+            }, status=status.HTTP_200_OK)
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
             match_request.accepted_at = datetime.now()
