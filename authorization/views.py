@@ -22,6 +22,21 @@ from .tasks import async_image_upload
 from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
+
+#from oauth2client.service_account import ServiceAccountCredentials
+
+#scopes = ['https://www.googleapis.com/auth/androidpublisher']
+#credentials = ServiceAccountCredentials.from_json_keyfile_name('api-7596831323571844011-92784-c86e59b033df.json', scopes)
+
+#from httplib2 import Http
+
+#http_auth = credentials.authorize(Http())
+#from googleapiclient.discovery import build
+
+#androidpublisher = build('androidpublisher', 'v2', http=http_auth)
+
+
+
 def pretty_request(request):
     headers = ''
     for header, value in request.META.items():
@@ -178,7 +193,7 @@ class CertificateView(APIView):
         
     """
     permission_classes = [IsAuthenticated]
-    def post(Self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         TAG = "cert"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
@@ -200,7 +215,7 @@ class ChangeAvataView(APIView):
             - uploaded_file: 변경할 사진
         
     """
-    def post(Self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         TAG="avata"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
@@ -209,3 +224,38 @@ class ChangeAvataView(APIView):
 
         return Response(data=None, status=status.HTTP_200_OK)
 
+class BuyTicketView(APIView):
+    """
+        티켓 구매 API
+
+        ---
+        # Body Schema
+            - purchase_number: 구매 티켓 개수
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        '''
+        device_type = request.data["device"]
+        purchase_token = request.data["purchase_token"]
+        purchase_number = int(request.data["purchase_number"])
+        print("device_type: ", device_type)
+        print("purchase_token: ", purchase_token)
+        print("purchase_number: ", purchase_number)
+        
+        package_name = ''
+        product_id = ''
+        if(device_type == 'android'):
+            package_name = 'com.yamigu.yamigu_app' 
+            if(purchase_number == 1):
+                product_id = 'ticket_1'
+            elif(purchase_number == 3):
+                product_id = 'ticket_2_plus_1'
+            product = androidpublisher.purchases().products().get(productId=product_id, packageName=package_name, token=purchase_token)
+            purchase = product.execute()
+        '''
+        purchase_number = int(request.data["purchase_number"])
+        user = User.objects.get(id=request.user.id)
+        user.ticket = user.ticket + purchase_number
+        
+        return Response(data=None, status=status.HTTP_200_OK)

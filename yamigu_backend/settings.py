@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
     'fcm_django',
+    'sslserver',
 ]
 
 MIDDLEWARE = [

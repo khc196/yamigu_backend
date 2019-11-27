@@ -19,8 +19,6 @@ from fcm_django.models import FCMDevice
 from core.utils import firebase_message
 import json
 
-
-
 class MeetingCreateView(APIView):
     """
         새로운 미팅 생성 API
@@ -202,7 +200,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
             if(maximum_age < 11):
                 filtered_data = filtered_data.filter(Q(openby__age__lte=maximum_age+20))
-            my_meetings = Meeting.objects.filter(openby__id=request.user.id, is_matched=False)
+            my_meetings = Meeting.objects.filter(openby__id=request.user.id)
             if(my_meetings.count() > 0):
                 for data in filtered_data:
                     for match in data.match_receiver.all():
