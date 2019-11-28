@@ -467,7 +467,7 @@ class MeetingAcceptRequestMatchView(APIView):
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
         receiver_user_id = match_request.receiver.openby.id
-        if request.sender.is_matched or request.receiver.is_matched:
+        if match_request.sender.is_matched or match_request.receiver.is_matched:
             match_id = match_request.id
             match_request.delete()
             return JsonResponse(data={
