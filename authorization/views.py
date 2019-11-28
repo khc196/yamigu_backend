@@ -17,7 +17,7 @@ from firebase_admin import auth
 
 import base64
 
-from core.utils.file_helper import save_uploaded_file
+from core.utils.file_helper import save_uploaded_file, rotate_image, get_file_path
 from .tasks import async_image_upload
 from requests.exceptions import HTTPError
 
@@ -221,7 +221,7 @@ class ChangeAvataView(APIView):
         user = User.objects.get(id=request.user.id)
         user.image = "http://106.10.39.154:9999/media/" + TAG + "/" + file_name
         user.save()
-
+        rotate_image(get_file_path(file_name))
         return JsonResponse(data={
             'new_avata': user.image}, 
             status=status.HTTP_200_OK)
