@@ -17,7 +17,7 @@ def save_uploaded_file(f, TAG):
     return filename
 def get_file_path(filename):
     root_path = os.path.join(settings.MEDIA_ROOT, TAG)
-    file_path os.path.join(root_path, filename)
+    file_path = os.path.join(root_path, filename)
     return file_path
 def rotate_image(filepath):
   try:
