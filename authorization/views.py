@@ -222,7 +222,9 @@ class ChangeAvataView(APIView):
         user.image = "http://106.10.39.154:9999/media/" + TAG + "/" + file_name
         user.save()
 
-        return Response(data=user.image, status=status.HTTP_200_OK)
+        return JsonResponse(data={
+            'new_avata': user.image}, 
+            status=status.HTTP_200_OK)
 
 class BuyTicketView(APIView):
     """
