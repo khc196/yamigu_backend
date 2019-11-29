@@ -49,6 +49,9 @@ class MeetingCreateView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
+        my_meetings = Meeting.objects.get(openby__id=request.user.id)
+        if my_meetings.count() == 3:
+            return Response(data=None, status=status.HTTP_200_OK)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
