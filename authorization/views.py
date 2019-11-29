@@ -227,7 +227,7 @@ class ChangeAvataView(APIView):
             status=status.HTTP_200_OK)
 class ImageURLView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request, uid):
+    def post(self, request, uid):
         user = User.objects.get(uid=uid)
         return JsonResponse(data={
        	    'profile_url': user.image},
