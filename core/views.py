@@ -720,6 +720,18 @@ class RecommendationMeetingListView(APIView):
     def get(Self, request, *args, **kwargs):
         now=datetime.today()
         meetings = Meeting.objects.all().filter(~Q(openby=request.user.id)).filter(is_matched=False).filter(date__gte=now).order_by('date')
+        my_meetings = Meeting.objects.filter(openby__id=request.user.id)
+        if(my_meetings.count() > 0):
+            for data in meetings:
+                for match in data.match_receiver.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        meetings = meetings.exclude(id=data.id)
+                for match in data.match_sender.all():
+                    if match.sender in my_meetings or match.receiver in my_meetings:
+                        meetings = meetings.exclude(id=data.id)
+                for mine in my_meetings:
+                    if data.date == mine.date and (data.meeting_type != mine.meeting_type or mine.is_matched):
+                        meetings = meetings.exclude(id=data.id)
         meetings = meetings[:5] 
         serializer = MeetingSerializer(meetings, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
