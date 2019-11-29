@@ -225,6 +225,21 @@ class ChangeAvataView(APIView):
         return JsonResponse(data={
             'new_avata': user.image}, 
             status=status.HTTP_200_OK)
+class ImageURLView(APIView):
+     """
+        유저의 UID로 이미지 URL 가져오는 API
+        
+        ---
+        # Body Schema
+            - uid: 유저 uid
+    """
+    permission_classes = [IsAuthenticated]
+    def get(self, request, uid):
+        user = User.objects.get(uid=uid)
+        return JSsonResponse(data={
+            'profile_url': user.image},
+            status=status.HTTP_200_OK)
+        })
 
 class BuyTicketView(APIView):
     """
