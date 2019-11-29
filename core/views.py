@@ -305,7 +305,7 @@ class MeetingSendRequestMatchView(APIView):
         target_meeting = Meeting.objects.get(pk=request.data['meeting_id'])
         if(target_meeting.is_matched):
         	return JsonResponse(data={
-        		'message': 'target aleady matched',
+        		'message': 'target already matched',
 			},status=status.HTTP_200_OK)
         if(int(request.data['meeting_type']) != target_meeting.meeting_type.id):
             print("different type")
@@ -319,7 +319,7 @@ class MeetingSendRequestMatchView(APIView):
         }, status=status.HTTP_200_OK)
         if(prev_meeting[0].is_matched):
         	return JsonResponse(data={
-        		'message': 'my card aleady matched',
+        		'message': 'my card already matched',
 			},status=status.HTTP_200_OK)
         data = {
             'sender': prev_meeting[0].id,
@@ -331,7 +331,7 @@ class MeetingSendRequestMatchView(APIView):
         
         if(matches.count() > 0):
         	return JsonResponse(data={
-        		'message': 'aleady exists',
+        		'message': 'already exists',
 			},status=status.HTTP_200_OK)
          
         serializer = MatchRequestSerializer(data=data)
@@ -395,7 +395,7 @@ class MeetingSendRequestMatchNewView(APIView):
         receiver = Meeting.objects.get(pk=request.data['meeting_id'])
         if(receiver.is_matched):
         	return JsonResponse(data={
-        		'message': 'target aleady matched',
+        		'message': 'target already matched',
 			},status=status.HTTP_200_OK)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
@@ -483,10 +483,8 @@ class MeetingAcceptRequestMatchView(APIView):
             match_id = match_request.id
             match_request.delete()
             return JsonResponse(data={
-                'data': {
                     'match_id': match_id,
                     'message': "Duplicated"
-                },
             }, status=status.HTTP_200_OK)
         if request.user.id == receiver_user_id:
             match_request.is_selected = True
@@ -517,11 +515,9 @@ class MeetingAcceptRequestMatchView(APIView):
             firebase_message.send_push(sender_user_id, push_data)
             firebase_message.send_notification(sender_user_uid, 2, notification_content, notification_data)
             return JsonResponse(data={
-                'data': {
                     'match_id': match_request.id,
                     'count_meeting': count_meeting,
                     'message': "Accepted"
-                },
             }, status=status.HTTP_200_OK)
             
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
