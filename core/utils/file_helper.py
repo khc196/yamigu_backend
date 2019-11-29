@@ -15,7 +15,7 @@ def save_uploaded_file(f, TAG):
             destination.write(chunk)
 
     return filename
-def get_file_path(filename):
+def get_file_path(filename, TAG):
     root_path = os.path.join(settings.MEDIA_ROOT, TAG)
     file_path = os.path.join(root_path, filename)
     return file_path
@@ -23,7 +23,7 @@ def rotate_image(filepath):
   try:
     image = Image.open(filepath)
     for orientation in ExifTags.TAGS.keys():
-      if ExifTags.TAGS[orientation] == 'Orientation':
+        if ExifTags.TAGS[orientation] == 'Orientation':
             break
     exif = dict(image._getexif().items())
 
