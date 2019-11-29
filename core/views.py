@@ -303,6 +303,10 @@ class MeetingSendRequestMatchView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
     def post(self, request, *args, **kwargs):
         target_meeting = Meeting.objects.get(pk=request.data['meeting_id'])
+        if(target_meeting.is_matched):
+        	return JsonResponse(data={
+        		'message': 'target aleady matched',
+			},status=status.HTTP_200_OK)
         if(int(request.data['meeting_type']) != target_meeting.meeting_type.id):
             print("different type")
             return JsonResponse(data={
@@ -313,6 +317,10 @@ class MeetingSendRequestMatchView(APIView):
             return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
         }, status=status.HTTP_200_OK)
+        if(prev_meeting[0].is_matched):
+        	return JsonResponse(data={
+        		'message': 'my card aleady matched',
+			},status=status.HTTP_200_OK)
         data = {
             'sender': prev_meeting[0].id,
             'receiver': request.data['meeting_id'],
@@ -384,6 +392,11 @@ class MeetingSendRequestMatchNewView(APIView):
     		'rating': None,
     		'is_matched': False,
     	}
+        receiver = Meeting.objects.get(pk=request.data['meeting_id'])
+        if(receiver.is_matched):
+        	return JsonResponse(data={
+        		'message': 'target aleady matched',
+			},status=status.HTTP_200_OK)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
@@ -397,7 +410,6 @@ class MeetingSendRequestMatchNewView(APIView):
             if serializer2.is_valid():
                 match = serializer2.save()
                 #TODO: Push notification & Firebase DB notification (to Receiver)
-                receiver = Meeting.objects.get(pk=request.data['meeting_id'])
                 receiver_user_id = receiver.openby.id
                 receiver_user_uid = receiver.openby.uid
                 month = meeting.date.month
