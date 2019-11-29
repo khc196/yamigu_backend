@@ -315,7 +315,8 @@ class MeetingSendRequestMatchView(APIView):
             return JsonResponse(data={
                 'message': 'different type', 
         }, status=status.HTTP_200_OK)
-        my_meetings = Meeting.objects.filter(openby__id=request.user.id)
+        now=datetime.today()
+        my_meetings = Meeting.objects.filter(openby__id=request.user.id).filter(date__gte=now)
         prev_meeting = Meeting.objects.filter(openby__id=request.user.id, date=self.get_date_object(request.data['date']))
         if(prev_meeting.count() == 0) :
             if(my_meetings.count() == 3):
