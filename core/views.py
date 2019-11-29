@@ -315,11 +315,16 @@ class MeetingSendRequestMatchView(APIView):
             return JsonResponse(data={
                 'message': 'different type', 
         }, status=status.HTTP_200_OK)
+        my_meetings = Meeting.objects.filter(openby=request.user.id)
         prev_meeting = Meeting.objects.filter(openby=request.user.id, date=self.get_date_object(request.data['date']))
         if(prev_meeting.count() == 0) :
+            if(my_meetings.count() == 3):
+                return JsonResponse(data={
+                    'message': 'full card', 
+                    }, status=status.HTTP_200_OK)
             return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
-        }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_200_OK)
         if(prev_meeting[0].is_matched):
         	return JsonResponse(data={
         		'message': 'my card already matched',
