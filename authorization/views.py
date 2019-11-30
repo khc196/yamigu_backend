@@ -183,12 +183,6 @@ class SignUpView(APIView):
 class KakaoLoginView(SocialLoginView):
     adapter_class = KakaoOAuth2Adapter
 
-class AppleLoginView(APIView):
-    def post(self, request, *args, **kwargs):
-        access_token = request.data['access_token']
-        oauth = AppleOAuth2()
-        oauth.do_auth(access_token, *args, **kwargs)
-
 class CertificateView(APIView):
     """
         소속 인증 API
