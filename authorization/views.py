@@ -167,7 +167,7 @@ class SignUpView(APIView):
             - cert_img: 소속 인증 사진
         
     """
-    def post(Self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         user = User.objects.select_related().get(id=request.user.id)
         user.nickname = request.data['nickname']
         user.real_name = request.data['real_name']
@@ -183,7 +183,9 @@ class SignUpView(APIView):
 class KakaoLoginView(SocialLoginView):
     adapter_class = KakaoOAuth2Adapter
 class AppleLoginView(APIView):
-
+    def post(self, request, *args, **kwargs):
+        access_token = request.data['access_token']
+        AppleOAuth2.do_auth(access_token, args, kwargs)
 class CertificateView(APIView):
     """
         소속 인증 API
