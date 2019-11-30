@@ -186,7 +186,8 @@ class KakaoLoginView(SocialLoginView):
 class AppleLoginView(APIView):
     def post(self, request, *args, **kwargs):
         access_token = request.data['access_token']
-        AppleOAuth2.do_auth(access_token, *args, **kwargs)
+        oauth = AppleOAuth2()
+        oauth.do_auth(access_token, *args, **kwargs)
 
 class CertificateView(APIView):
     """
