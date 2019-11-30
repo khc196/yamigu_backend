@@ -596,7 +596,7 @@ class MeetingCancelMatchView(APIView):
     def post(self, request, *args, **kwargs):
         match_request = get_object_or_404(MatchRequest, id=request.data['match_id'])
         match_id = match_request.id
-        partner = match_request.receiver.openby if match_request.sender.openby.id == request.user.id else match_request.receiver.openby
+        partner = match_request.receiver.openby if match_request.sender.openby.id == request.user.id else match_request.sender.openby
         try:
             match_request.sender.delete()
             match_request.receiver.delete()

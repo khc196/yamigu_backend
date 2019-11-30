@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
+    'social_django',
     'core',
     'authorization',
     'rest_auth',
@@ -57,7 +58,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
-    'social_django',
     'fcm_django',
     'sslserver',
 ]
@@ -79,7 +79,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = 'name'
 ACCOUNT_USERNAME_REQUIRED = False
 AUTH_USER_MODEL = 'authorization.User'
 AUTHENTICATION_BACKENDS = [
-'authorization.oauth_apple.AppleOAuth2',
+'social_core.backends.apple.AppleOAuth2',
 'django.contrib.auth.backends.ModelBackend'
 ]
 
@@ -91,6 +91,7 @@ REST_AUTH_SERIALIZERS = { 'USER_DETAILS_SERIALIZER':'authorization.serializers.U
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_HTTPONLY = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -205,3 +206,5 @@ SOCIAL_AUTH_APPLE_KEY_ID = env('SOCIAL_AUTH_APPLE_KEY_ID')
 SOCIAL_AUTH_APPLE_PRIVATE_KEY = env('SOCIAL_AUTH_APPLE_PRIVATE_KEY')
 SOCIAL_AUTH_APPLE_TEAM_ID = env('SOCIAL_AUTH_APPLE_TEAM_ID')
 SOCIAL_AUTH_APPLE_CLIENT_ID = env('SOCIAL_AUTH_APPLE_CLIENT_ID')
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
