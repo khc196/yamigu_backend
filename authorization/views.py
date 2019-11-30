@@ -23,7 +23,7 @@ from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
 
-from oauth_apple import AppleOAuth2
+from authorization.oauth_apple import AppleOAuth2
 #from oauth2client.service_account import ServiceAccountCredentials
 
 #scopes = ['https://www.googleapis.com/auth/androidpublisher']
