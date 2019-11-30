@@ -23,6 +23,7 @@ from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
 
+from oauth_apple import AppleOAuth2
 #from oauth2client.service_account import ServiceAccountCredentials
 
 #scopes = ['https://www.googleapis.com/auth/androidpublisher']
@@ -181,7 +182,7 @@ class SignUpView(APIView):
         return Response(data=None, status=status.HTTP_200_OK)
 class KakaoLoginView(SocialLoginView):
     adapter_class = KakaoOAuth2Adapter
-
+class AppleLoginView(APIView):
 
 class CertificateView(APIView):
     """
