@@ -1,0 +1,5 @@
+/root/venv/bin/gunicorn \
+--name=yamigu_backend \
+--pythonpath=yamigu_backend \
+--bind=0.0.0.0:9999 \
+yamigu_backend.wsgi:application
