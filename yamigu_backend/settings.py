@@ -80,6 +80,7 @@ ACCOUNT_USERNAME_REQUIRED = False
 AUTH_USER_MODEL = 'authorization.User'
 AUTHENTICATION_BACKENDS = [
 'authorization.oauth_apple.AppleOAuth2',
+'social_core.backends.google.GoogleOAuth2'
 'django.contrib.auth.backends.ModelBackend'
 ]
 
