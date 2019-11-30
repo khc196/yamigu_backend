@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
+    'social_django',
     'fcm_django',
     'sslserver',
 ]
@@ -77,6 +78,10 @@ ACCOUNT_AUTHENTICATION_METHOD = 'name'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'name'
 ACCOUNT_USERNAME_REQUIRED = False
 AUTH_USER_MODEL = 'authorization.User'
+AUTHENTICATION_BACKENDS = [
+'authorization.oauth_apple.AppleOAuth2',
+'django.contrib.auth.backends.ModelBackend'
+]
 
 SITE_ID=1
 
