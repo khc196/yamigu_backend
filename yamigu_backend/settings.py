@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework.authtoken',
-    'social_django',
     'core',
     'authorization',
     'rest_auth',
@@ -58,6 +57,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
+    'allauth.socialaccount.providers.apple',
     'fcm_django',
     'sslserver',
 ]
@@ -78,10 +78,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'name'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'name'
 ACCOUNT_USERNAME_REQUIRED = False
 AUTH_USER_MODEL = 'authorization.User'
-AUTHENTICATION_BACKENDS = [
-'social_core.backends.apple.AppleOAuth2',
-'django.contrib.auth.backends.ModelBackend'
-]
 
 SITE_ID=1
 

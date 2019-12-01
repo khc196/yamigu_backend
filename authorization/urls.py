@@ -8,7 +8,7 @@ api_urlpattern = [
     path('user/info/', UserInfoView.as_view()),
     path('user/change/nickname/', ChangeNicknameView.as_view()),
     path('oauth/kakao/', KakaoLoginView.as_view(), name='socialaccount_signin'),
-    path('social/', include('social_django.urls')),
+    path('oauth/apple/', AppleLoginView.as_view(), name='socialaccount_signin'),
     path('user/validation/nickname/<nickname>', NicknameValidator.as_view()),
     path('auth/signup/', SignUpView.as_view()),
     path('user/certificate/', CertificateView.as_view()),
