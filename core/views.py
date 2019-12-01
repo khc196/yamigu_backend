@@ -741,7 +741,10 @@ class RecommendationMeetingListView(APIView):
         serializer = MeetingSerializer(meetings, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-
+class CallManagerView(APIView):
+    permission_class = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()

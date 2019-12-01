@@ -22,6 +22,7 @@ api_urlpattern = [
     path('matching/cancel_matching/', MeetingCancelMatchView.as_view()),
     #path('meetings/rate/', RatingView.as_view()),
     path('meetings/feedback/', FeedbackView.as_view()),
+    path('call_manager/', CallManagerView.as_view()),)
     path('fcm/register_device/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),
     path('fcm/send_push/', PushNotificationView.as_view()),
 ]
