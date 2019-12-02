@@ -706,7 +706,7 @@ class PushNotificationView(APIView):
                 data=json.loads(request.data['data'])
             except TypeError:
                 data=request.data['data']
-            
+            #print(data)
             firebase_message.send_push(user, data)
             return Response(status=status.HTTP_200_OK)
         except MultiValueDictKeyError: 
