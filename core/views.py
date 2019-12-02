@@ -611,7 +611,6 @@ class MeetingCancelMatchView(APIView):
                 'clickAction': ".NotificationActivity",
                 'intentArgs': ""
             }
-        
             firebase_message.send_push(partner.id, push_data)
             firebase_message.send_notification(partner.uid, 6, notification_content, notification_data)
             return Response(data=match_id, status=status.HTTP_200_OK)
