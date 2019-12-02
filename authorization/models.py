@@ -63,7 +63,7 @@ class UserManager(BaseUserManager):
     def create_kakao_user(self, user_pk, extra_data):
         user = User.objects.get(pk=user_pk)
         
-        user.name = extra_data['properties']['nickname'] + str(extra_data['id'])
+        user.name = 'kakao-' + extra_data['properties']['nickname'] + str(extra_data['id'])
         user.uid = str(extra_data['id'])
         user.save(using=self._db)
         print(str(extra_data['id']))
@@ -87,7 +87,7 @@ class UserManager(BaseUserManager):
     def create_apple_user(self, user_pk, extra_data):
         user = User.objects.get(pk=user_pk)
         
-        user.name = extra_data['name'] + str(extra_data['uid'])
+        user.name = 'apple-' + extra_data['name'] + str(extra_data['uid'])
         user.uid = str(extra_data['uid'])
         user.save(using=self._db)
         print(str(extra_data['uid']))
