@@ -8,3 +8,4 @@ credentials.json
 .env
 db.sqlite3
 media/*
+yamigu_push.p12

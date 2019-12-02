@@ -14,6 +14,7 @@ import os
 import firebase_admin
 from firebase_admin import credentials, db
 import environ
+from OpenSSL import crypto
 
 env = environ.Env(
     # set casting, default value
@@ -199,7 +200,10 @@ FCM_DJANGO_SETTINGS = {
 MANAGER_ID = env('MANAGER_ID')
 
 SOCIAL_AUTH_APPLE_KEY_ID = env('SOCIAL_AUTH_APPLE_KEY_ID')
-SOCIAL_AUTH_APPLE_PRIVATE_KEY = env('SOCIAL_AUTH_APPLE_PRIVATE_KEY')
+privkey_file = env('SOCIAL_AUTH_APPLE_PRIVATE_KEY')
+p12 = crypto.load_pkcs12(open(privkey_file, "rb").read(), env("APPLE_DEV_PW"))
+
+SOCIAL_AUTH_APPLE_PRIVATE_KEY = crypto.dump_privatekey(crypto.FILETYPE_PEM, p12.get_privatekey())
 SOCIAL_AUTH_APPLE_TEAM_ID = env('SOCIAL_AUTH_APPLE_TEAM_ID')
 SOCIAL_AUTH_APPLE_CLIENT_ID = env('SOCIAL_AUTH_APPLE_CLIENT_ID')
 
