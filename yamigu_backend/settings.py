@@ -15,7 +15,6 @@ import firebase_admin
 from firebase_admin import credentials, db
 import environ
 from OpenSSL import crypto
-import pem
 
 env = environ.Env(
     # set casting, default value
