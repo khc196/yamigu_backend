@@ -164,7 +164,6 @@ class SignUpView(APIView):
             - belong: 소속(학교 or 직장)
             - department: 부서(전공 or 팀)
             - age: 나이 
-            - cert_img: 소속 인증 사진
         
     """
     def post(self, request, *args, **kwargs):

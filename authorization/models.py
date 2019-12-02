@@ -118,7 +118,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     uid = models.CharField(max_length=20, null=True, unique=True)
     real_name = models.CharField(max_length=20, null=True)
     gender = models.IntegerField(blank=False, null=True)
-    nickname = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    nickname = models.CharField(max_length=20, blank=True, null=True)
     phone_regex = RegexValidator(regex=r'\d{3}[-]?\d{4}[-]?\d{4}', message="Phone number is invalid.")
     phone = models.CharField(_('phone number'), validators=[phone_regex], max_length=14, null=True)
     is_student = models.BooleanField(default=True)
