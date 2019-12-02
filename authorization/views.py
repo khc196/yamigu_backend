@@ -197,7 +197,7 @@ class CertificateView(APIView):
         TAG = "cert"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
         user = User.objects.get(id=request.user.id)
-        user.cert_image = "http://106.10.39.154/9999/media/"+TAG+"/"+file_name
+        user.cert_image = "http://106.10.39.154:9999/media/"+TAG+"/"+file_name
         user.user_certified = 1
         user.save()
         
