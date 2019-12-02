@@ -87,13 +87,13 @@ class UserManager(BaseUserManager):
     def create_apple_user(self, user_pk, extra_data):
         user = User.objects.get(pk=user_pk)
         
-        user.name = 'apple-' + extra_data['name'] + str(extra_data['uid'])
+        user.name = 'apple-' + str(extra_data['uid'])
         user.uid = str(extra_data['uid'])
         user.save(using=self._db)
         print(str(extra_data['uid']))
        	user.firebase_token = create_token_uid(str(extra_data['uid']))
        	try:
-       		auth.create_user(uid=user.uid, photo_url=user.image)
+       		auth.create_user(uid=user.uid)
        	except UidAlreadyExistsError:
        		pass
        	except ValueError:
