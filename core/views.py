@@ -193,7 +193,6 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
             maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
             #print(request.user.id)
-
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
             
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
@@ -268,11 +267,10 @@ class WaitingMeetingListNumberView(APIView):
                     if match.sender in my_meetings or match.receiver in my_meetings:
                         filtered_data = filtered_data.exclude(id=data.id)
                 for mine in my_meetings:
-                    if data.date == mine.date and data.meeting_type == mine.meeting_type:
+                    if data.date == mine.date and not data.meeting_type == mine.meeting_type:
                         filtered_data = filtered_data.exclude(id=data.id)
-            filtered_data = filtered_data.exclude(is_matched=True)
             count = filtered_data.count()
-
+            #print(count)
             return JsonResponse(data={
                 'count' : count,
             }, json_dumps_params = {'ensure_ascii': True}, status=status.HTTP_200_OK)
@@ -350,7 +348,7 @@ class MeetingSendRequestMatchView(APIView):
             month = prev_meeting[0].date.month
             day = prev_meeting[0].date.day
             notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
-            print(notification_content)
+            #print(notification_content)
             notification_data = ""
             push_data = {
                 'title': "야미구",
@@ -421,7 +419,7 @@ class MeetingSendRequestMatchNewView(APIView):
                 month = meeting.date.month
                 day = meeting.date.day
                 notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
-                print(notification_content)
+                #print(notification_content)
                 notification_data = ""
                 push_data = {
                     'title': "야미구",
