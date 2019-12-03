@@ -63,6 +63,8 @@ class MeetingCreateView(APIView):
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
+            user.ticket = user.ticket - 1
+            user.save()
             return Response(data=meeting.id, status=status.HTTP_200_OK)
         print(serializer.errors)
        
