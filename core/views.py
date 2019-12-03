@@ -332,10 +332,6 @@ class MeetingSendRequestMatchView(APIView):
         my_meetings = Meeting.objects.filter(openby__id=request.user.id).filter(date__gte=now)
         prev_meeting = Meeting.objects.filter(openby__id=request.user.id, date=self.get_date_object(request.data['date']))
         user = User.objects.get(id=request.user.id)
-        if(user.ticket == 0):
-            return JsonResponse(data={
-                    'message': 'no ticket', 
-                    }, status=status.HTTP_200_OK)
         if(prev_meeting.count() == 0) :
             if(my_meetings.count() == 3):
                 return JsonResponse(data={
