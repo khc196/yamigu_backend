@@ -138,11 +138,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     firebase_token= models.CharField(max_length=1000, null=True, unique=True)
     objects = UserManager()
     USERNAME_FIELD = 'name'
-    def image_tag(self):
-        from django.utils.html import escape
-        return u'<img src="%s" />' % escape(<URL to the image>)
-    image_tag.short_description = 'Image'
-    image_tag.allow_tags = True
 
     def __str__(self):
         real_name = ''
