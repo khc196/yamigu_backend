@@ -49,10 +49,17 @@ class MeetingCreateView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
+        user = User.objects.get(id=request.user.id)
+        if(user.ticket == 0):
+            return JsonResponse(data={
+                    'message': 'no ticket', 
+                    }, status=status.HTTP_200_OK)
         now=datetime.today()
         my_meetings = Meeting.objects.all().filter(openby__id=request.user.id).filter(date__gte=now)
         if my_meetings.count() == 3:
-            return Response(data=None, status=status.HTTP_200_OK)
+            return JsonResponse(data={
+                    'message': 'full card', 
+                    }, status=status.HTTP_200_OK)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
