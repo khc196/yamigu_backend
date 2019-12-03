@@ -120,7 +120,10 @@ class MeetingDeleteView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
+        user = User.objects.get(id=request.user.id)
         meeting.delete()
+        user.ticket = user.ticket + 1
+        user.save()
         return Response(data=meeting.id, status=status.HTTP_200_OK)
 
 class MyMeetingListView(APIView):
