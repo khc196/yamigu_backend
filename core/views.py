@@ -542,10 +542,6 @@ class MeetingAcceptRequestMatchView(APIView):
                 'clickAction': ".NotificationActivity",
                 'intentArgs': ""
             }
-            sender.openby.ticket = sender.openby.ticket - 1
-            sender.openby.save()
-            receiver.openby.ticket = receiver.openby.ticket - 1
-            receiver.openby.save()
             sender_user_id = sender.openby.id
             sender_user_uid = sender.openby.uid
             firebase_message.send_push(sender_user_id, push_data)
