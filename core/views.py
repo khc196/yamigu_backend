@@ -132,7 +132,13 @@ class MyMeetingListView(APIView):
                     queryset=MatchRequest.objects.all()
                 )
                 )
-  
+            not_matched = Meeting.objects.filter(openby=request.user.id, date__lt=now, is_matched=False)
+            user = User.objects.get(id=request.user.id)
+            if(not_matched.count() > 0):
+                for meeting in not_matched:
+                    meeting.delete()
+                    user.ticket = user.ticket + 1
+                    user.save()
             serializer = MeetingSerializer(queryset, many=True)
             #print(serializer.data)
             return Response(serializer.data)
@@ -313,6 +319,11 @@ class MeetingSendRequestMatchView(APIView):
         now=datetime.today()
         my_meetings = Meeting.objects.filter(openby__id=request.user.id).filter(date__gte=now)
         prev_meeting = Meeting.objects.filter(openby__id=request.user.id, date=self.get_date_object(request.data['date']))
+        user = User.objects.get(id=request.user.id)
+        if(user.ticket == 0):
+            return JsonResponse(data={
+                    'message': 'no ticket', 
+                    }, status=status.HTTP_200_OK)
         if(prev_meeting.count() == 0) :
             if(my_meetings.count() == 3):
                 return JsonResponse(data={
@@ -345,6 +356,8 @@ class MeetingSendRequestMatchView(APIView):
             receiver = Meeting.objects.get(pk=data['receiver'])
             receiver_user_id = receiver.openby.id
             receiver_user_uid = receiver.openby.uid
+            user.ticket = user.ticket - 1
+            user.save()
             month = prev_meeting[0].date.month
             day = prev_meeting[0].date.day
             notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
@@ -413,6 +426,9 @@ class MeetingSendRequestMatchNewView(APIView):
             serializer2 = MatchRequestSerializer(data=data2)
             if serializer2.is_valid():
                 match = serializer2.save()
+                user = User.objects.get(id=request.user.id)
+                user.ticket = user.ticket - 1
+                user.save()
                 #TODO: Push notification & Firebase DB notification (to Receiver)
                 receiver_user_id = receiver.openby.id
                 receiver_user_uid = receiver.openby.uid
@@ -514,6 +530,10 @@ class MeetingAcceptRequestMatchView(APIView):
                 'clickAction': ".NotificationActivity",
                 'intentArgs': ""
             }
+            sender.openby.ticket = sender.openby.ticket - 1
+            sender.openby.save()
+            receiver.openby.ticket = receiver.openby.ticket - 1
+            receiver.openby.save()
             sender_user_id = sender.openby.id
             sender_user_uid = sender.openby.uid
             firebase_message.send_push(sender_user_id, push_data)
@@ -541,7 +561,10 @@ class MeetingCancelRequestMatchView(APIView):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
         sender_user_id = match_request.sender.openby.id
         if request.user.id == sender_user_id:
+            user = User.objects.get(id=request.user.id)
             match_request.delete()
+            user.ticket = user.ticket + 1
+            user.save()
             return Response(data=match_request.id, status=status.HTTP_200_OK)
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
@@ -600,6 +623,8 @@ class MeetingCancelMatchView(APIView):
             match_request.sender.delete()
             match_request.receiver.delete()
             match_request.delete()
+            partner.ticket = partner.ticket + 1
+            partner.save()
             #TODO: Push notification & Firebase DB notification 
             notification_content = "매칭 취소로 인해 티켓이 반환되었어요."
             notification_data = ""
