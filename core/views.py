@@ -337,6 +337,10 @@ class MeetingSendRequestMatchView(APIView):
                 return JsonResponse(data={
                     'message': 'full card', 
                     }, status=status.HTTP_200_OK)
+            if(user.ticket == 0):
+                return JsonResponse(data={
+                        'message': 'no ticket', 
+                        }, status=status.HTTP_200_OK)
             return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
                 }, status=status.HTTP_200_OK)
