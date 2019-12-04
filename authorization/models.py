@@ -86,12 +86,12 @@ class UserManager(BaseUserManager):
 
     def create_apple_user(self, user_pk, extra_data):
         user = User.objects.get(pk=user_pk)
-        
-        user.name = 'apple-' + str(extra_data['id'])
-        user.uid = str(extra_data['id'])
+        apple_id = extra_data['id'].replace(".", "")
+        user.name = 'apple-' +apple_id
+        user.uid = apple_id
         user.save(using=self._db)
-        print(str(extra_data['id']))
-       	user.firebase_token = create_token_uid(str(extra_data['id']))
+        print(apple_id)
+       	user.firebase_token = create_token_uid(apple_id)
        	try:
        		auth.create_user(uid=user.uid)
        	except UidAlreadyExistsError:
@@ -114,8 +114,8 @@ def create_token_uid(uid):
     return custom_token
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=20, null=True, unique=True)
-    uid = models.CharField(max_length=20, null=True, unique=True)
+    name = models.CharField(max_length=100, null=True, unique=True)
+    uid = models.CharField(max_length=100, null=True, unique=True)
     real_name = models.CharField(max_length=20, null=True)
     gender = models.IntegerField(blank=False, null=True)
     nickname = models.CharField(max_length=20, blank=True, null=True)
