@@ -151,7 +151,7 @@ class ChangeNicknameView(APIView):
     	})
 class VerifyView(APIView):
     """
-        회원가입 API
+        회원 여부 판단 API
         
         ---
         # Body Schema
