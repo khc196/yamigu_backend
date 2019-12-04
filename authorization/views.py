@@ -258,25 +258,23 @@ class BuyTicketView(APIView):
     """
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        '''
-        device_type = request.data["device"]
-        purchase_token = request.data["purchase_token"]
-        purchase_number = int(request.data["purchase_number"])
-        print("device_type: ", device_type)
-        print("purchase_token: ", purchase_token)
-        print("purchase_number: ", purchase_number)
+        # device_type = request.data["device"]
+        # purchase_token = request.data["purchase_token"]
+        # purchase_number = int(request.data["purchase_number"])
+        # print("device_type: ", device_type)
+        # print("purchase_token: ", purchase_token)
+        # print("purchase_number: ", purchase_number)
         
-        package_name = ''
-        product_id = ''
-        if(device_type == 'android'):
-            package_name = 'com.yamigu.yamigu_app' 
-            if(purchase_number == 1):
-                product_id = 'ticket_1'
-            elif(purchase_number == 3):
-                product_id = 'ticket_2_plus_1'
-            product = androidpublisher.purchases().products().get(productId=product_id, packageName=package_name, token=purchase_token)
-            purchase = product.execute()
-        '''
+        # package_name = ''
+        # product_id = ''
+        # if(device_type == 'android'):
+        #     package_name = 'com.yamigu.yamigu_app' 
+        #     if(purchase_number == 1):
+        #         product_id = 'ticket_1'
+        #     elif(purchase_number == 3):
+        #         product_id = 'ticket_2_plus_1'
+        #     product = androidpublisher.purchases().products().get(productId=product_id, packageName=package_name, token=purchase_token)
+        #     purchase = product.execute()
         purchase_number = int(request.data["purchase_number"])
         user = User.objects.get(id=request.user.id)
         user.ticket = user.ticket + purchase_number
