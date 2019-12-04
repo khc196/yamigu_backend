@@ -15,7 +15,7 @@ from .models import User
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
-
+from rest_framework.authtoken.models import Token
 import base64
 
 from core.utils.file_helper import save_uploaded_file, rotate_image, get_file_path
@@ -23,7 +23,7 @@ from .tasks import async_image_upload
 from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
-
+from django.contrib.auth.models import AbstractBaseUser
 #from oauth2client.service_account import ServiceAccountCredentials
 
 #scopes = ['https://www.googleapis.com/auth/androidpublisher']
@@ -149,7 +149,21 @@ class ChangeNicknameView(APIView):
     		'code': 200,
     		'data': user.nickname
     	})
-
+class VerifyView(APIView):
+    """
+        회원가입 API
+        
+        ---
+        # Body Schema
+            - phone: 핸드폰 번호
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(phone=request.data['phone'])
+            token = Token.objects.get(user=user)
+            return JsonResponse(data={"key":str(token)}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse(data={"key":None}, status=status.HTTP_200_OK)
 class SignUpView(APIView):
     """
         회원가입 API

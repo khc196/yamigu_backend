@@ -11,6 +11,7 @@ api_urlpattern = [
     path('oauth/apple/', AppleLoginView.as_view(), name='socialaccount_signin'),
     path('user/validation/nickname/<nickname>', NicknameValidator.as_view()),
     path('auth/signup/', SignUpView.as_view()),
+    path('auth/verify/', VerifyView.as_view()),
     path('user/certificate/', CertificateView.as_view()),
     path('user/change/avata/',  ChangeAvataView.as_view()),
     path('buyticket/', BuyTicketView.as_view()),
