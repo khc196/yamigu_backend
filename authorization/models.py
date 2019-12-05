@@ -114,8 +114,8 @@ def create_token_uid(uid):
     return custom_token
 
 class User(AbstractBaseUser, PermissionsMixin):
-    name = models.CharField(max_length=20, null=True, unique=True)
-    uid = models.CharField(max_length=20, null=True, unique=True)
+    name = models.CharField(max_length=100, null=True, unique=True)
+    uid = models.CharField(max_length=100, null=True, unique=True)
     real_name = models.CharField(max_length=20, null=True)
     gender = models.IntegerField(blank=False, null=True)
     nickname = models.CharField(max_length=20, blank=True, null=True)
