@@ -15,7 +15,7 @@ from .models import User
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
-
+from rest_framework.authtoken.models import Token
 import base64
 
 from core.utils.file_helper import save_uploaded_file, rotate_image, get_file_path
@@ -23,7 +23,7 @@ from .tasks import async_image_upload
 from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
-
+from django.contrib.auth.models import AbstractBaseUser
 #from oauth2client.service_account import ServiceAccountCredentials
 
 #scopes = ['https://www.googleapis.com/auth/androidpublisher']
@@ -149,7 +149,21 @@ class ChangeNicknameView(APIView):
     		'code': 200,
     		'data': user.nickname
     	})
-
+class VerifyView(APIView):
+    """
+        회원 여부 판단 API
+        
+        ---
+        # Body Schema
+            - phone: 핸드폰 번호
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(phone=request.data['phone'])
+            token = Token.objects.get(user=user)
+            return JsonResponse(data={"key":str(token)}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return JsonResponse(data={"key":None}, status=status.HTTP_200_OK)
 class SignUpView(APIView):
     """
         회원가입 API
@@ -244,25 +258,23 @@ class BuyTicketView(APIView):
     """
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
-        '''
-        device_type = request.data["device"]
-        purchase_token = request.data["purchase_token"]
-        purchase_number = int(request.data["purchase_number"])
-        print("device_type: ", device_type)
-        print("purchase_token: ", purchase_token)
-        print("purchase_number: ", purchase_number)
+        # device_type = request.data["device"]
+        # purchase_token = request.data["purchase_token"]
+        # purchase_number = int(request.data["purchase_number"])
+        # print("device_type: ", device_type)
+        # print("purchase_token: ", purchase_token)
+        # print("purchase_number: ", purchase_number)
         
-        package_name = ''
-        product_id = ''
-        if(device_type == 'android'):
-            package_name = 'com.yamigu.yamigu_app' 
-            if(purchase_number == 1):
-                product_id = 'ticket_1'
-            elif(purchase_number == 3):
-                product_id = 'ticket_2_plus_1'
-            product = androidpublisher.purchases().products().get(productId=product_id, packageName=package_name, token=purchase_token)
-            purchase = product.execute()
-        '''
+        # package_name = ''
+        # product_id = ''
+        # if(device_type == 'android'):
+        #     package_name = 'com.yamigu.yamigu_app' 
+        #     if(purchase_number == 1):
+        #         product_id = 'ticket_1'
+        #     elif(purchase_number == 3):
+        #         product_id = 'ticket_2_plus_1'
+        #     product = androidpublisher.purchases().products().get(productId=product_id, packageName=package_name, token=purchase_token)
+        #     purchase = product.execute()
         purchase_number = int(request.data["purchase_number"])
         user = User.objects.get(id=request.user.id)
         user.ticket = user.ticket + purchase_number

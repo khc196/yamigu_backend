@@ -49,13 +49,22 @@ class MeetingCreateView(APIView):
                 'rating': None,
                 'is_matched': False,
             }
+        user = User.objects.get(id=request.user.id)
+        if(user.ticket == 0):
+            return JsonResponse(data={
+                    'message': 'no ticket', 
+                    }, status=status.HTTP_200_OK)
         now=datetime.today()
         my_meetings = Meeting.objects.all().filter(openby__id=request.user.id).filter(date__gte=now)
         if my_meetings.count() == 3:
-            return Response(data=None, status=status.HTTP_200_OK)
+            return JsonResponse(data={
+                    'message': 'full card', 
+                    }, status=status.HTTP_200_OK)
         serializer = MeetingCreateSerializer(data=data)
         if serializer.is_valid():
             meeting = serializer.save()
+            user.ticket = user.ticket - 1
+            user.save()
             return Response(data=meeting.id, status=status.HTTP_200_OK)
         print(serializer.errors)
        
@@ -111,7 +120,10 @@ class MeetingDeleteView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         meeting = get_object_or_404(Meeting, id=request.data['meeting_id'])
+        user = User.objects.get(id=request.user.id)
         meeting.delete()
+        user.ticket = user.ticket + 1
+        user.save()
         return Response(data=meeting.id, status=status.HTTP_200_OK)
 
 class MyMeetingListView(APIView):
@@ -132,7 +144,13 @@ class MyMeetingListView(APIView):
                     queryset=MatchRequest.objects.all()
                 )
                 )
-  
+            not_matched = Meeting.objects.filter(openby=request.user.id, date__lt=now, is_matched=False)
+            user = User.objects.get(id=request.user.id)
+            if(not_matched.count() > 0):
+                for meeting in not_matched:
+                    meeting.delete()
+                    user.ticket = user.ticket + 1
+                    user.save()
             serializer = MeetingSerializer(queryset, many=True)
             #print(serializer.data)
             return Response(serializer.data)
@@ -193,7 +211,6 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             minimum_age = int(request.GET.get('minimum_age')) if request.GET.get('minimum_age') != None else 0
             maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
             #print(request.user.id)
-
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
             
             filtered_data = filtered_data.filter(Q(openby__age__gte=minimum_age+20))
@@ -268,11 +285,10 @@ class WaitingMeetingListNumberView(APIView):
                     if match.sender in my_meetings or match.receiver in my_meetings:
                         filtered_data = filtered_data.exclude(id=data.id)
                 for mine in my_meetings:
-                    if data.date == mine.date and data.meeting_type == mine.meeting_type:
+                    if data.date == mine.date and not data.meeting_type == mine.meeting_type:
                         filtered_data = filtered_data.exclude(id=data.id)
-            filtered_data = filtered_data.exclude(is_matched=True)
             count = filtered_data.count()
-
+            #print(count)
             return JsonResponse(data={
                 'count' : count,
             }, json_dumps_params = {'ensure_ascii': True}, status=status.HTTP_200_OK)
@@ -315,11 +331,16 @@ class MeetingSendRequestMatchView(APIView):
         now=datetime.today()
         my_meetings = Meeting.objects.filter(openby__id=request.user.id).filter(date__gte=now)
         prev_meeting = Meeting.objects.filter(openby__id=request.user.id, date=self.get_date_object(request.data['date']))
+        user = User.objects.get(id=request.user.id)
         if(prev_meeting.count() == 0) :
             if(my_meetings.count() == 3):
                 return JsonResponse(data={
                     'message': 'full card', 
                     }, status=status.HTTP_200_OK)
+            if(user.ticket == 0):
+                return JsonResponse(data={
+                        'message': 'no ticket', 
+                        }, status=status.HTTP_200_OK)
             return JsonResponse(data={
                 'message': 'You should create new meeting for matching', 
                 }, status=status.HTTP_200_OK)
@@ -347,10 +368,12 @@ class MeetingSendRequestMatchView(APIView):
             receiver = Meeting.objects.get(pk=data['receiver'])
             receiver_user_id = receiver.openby.id
             receiver_user_uid = receiver.openby.uid
+            user.ticket = user.ticket - 1
+            user.save()
             month = prev_meeting[0].date.month
             day = prev_meeting[0].date.day
             notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
-            print(notification_content)
+            #print(notification_content)
             notification_data = ""
             push_data = {
                 'title': "야미구",
@@ -415,13 +438,16 @@ class MeetingSendRequestMatchNewView(APIView):
             serializer2 = MatchRequestSerializer(data=data2)
             if serializer2.is_valid():
                 match = serializer2.save()
+                user = User.objects.get(id=request.user.id)
+                user.ticket = user.ticket - 1
+                user.save()
                 #TODO: Push notification & Firebase DB notification (to Receiver)
                 receiver_user_id = receiver.openby.id
                 receiver_user_uid = receiver.openby.uid
                 month = meeting.date.month
                 day = meeting.date.day
                 notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
-                print(notification_content)
+                #print(notification_content)
                 notification_data = ""
                 push_data = {
                     'title': "야미구",
@@ -543,7 +569,10 @@ class MeetingCancelRequestMatchView(APIView):
         match_request = get_object_or_404(MatchRequest, id=request.data['request_id'])
         sender_user_id = match_request.sender.openby.id
         if request.user.id == sender_user_id:
+            user = User.objects.get(id=request.user.id)
             match_request.delete()
+            user.ticket = user.ticket + 1
+            user.save()
             return Response(data=match_request.id, status=status.HTTP_200_OK)
         return Response(data=match_request.id, status=status.HTTP_400_BAD_REQUEST)
 
@@ -602,6 +631,8 @@ class MeetingCancelMatchView(APIView):
             match_request.sender.delete()
             match_request.receiver.delete()
             match_request.delete()
+            partner.ticket = partner.ticket + 1
+            partner.save()
             #TODO: Push notification & Firebase DB notification 
             notification_content = "매칭 취소로 인해 티켓이 반환되었어요."
             notification_data = ""
