@@ -24,6 +24,9 @@ from requests.exceptions import HTTPError
 
 from firebase_admin._auth_utils import UserNotFoundError
 from django.contrib.auth.models import AbstractBaseUser
+
+from core.utils import firebase_message
+
 #from oauth2client.service_account import ServiceAccountCredentials
 
 #scopes = ['https://www.googleapis.com/auth/androidpublisher']
@@ -206,7 +209,6 @@ class CertificateView(APIView):
             - uploaded_file: 소속 인증 사진
         
     """
-    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         TAG = "cert"
         file_name = save_uploaded_file(request.data['uploaded_file'], TAG)
@@ -219,6 +221,22 @@ class CertificateView(APIView):
 
         return Response(data=None, status=status.HTTP_200_OK)
 
+class CertificateAdminView(APIView):
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.data['user'])
+        notification_content = "인증이 완료되었어요! 즐거운 야미구 하세요!"
+        #print(notification_content)
+        notification_data = ""
+        push_data = {
+            'title': "야미구",
+            'content': notification_content,
+            'clickAction': ".NotificationActivity",
+            'intentArgs': ""
+        }
+        firebase_message.send_push(user.id, push_data)
+        firebase_message.send_notification(user.uid, 1, notification_content, notification_data)
+        return Response(data=None, status=status.HTTP_200_OK)
+    
 class ChangeAvataView(APIView):
     """
 
