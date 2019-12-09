@@ -648,6 +648,16 @@ class MeetingCancelMatchView(APIView):
         except:
             return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
 
+class ChattingRoomListView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = MatchRequest.objects.filter(is_selected=True)
+            serializer = ChattingRoomListSerializer(queryset, many=True, context={'request': request})
+           # print(serializer.data)
+            return Response(serializer.data)
+        except Meeting.DoesNotExist as e:
+            raise Http404
+
 # class RatingView(APIView):
 #     """
 #         별점 평가 API

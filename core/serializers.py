@@ -84,4 +84,19 @@ class MatchRequestReceiverSerializer(ModelSerializer):
         model = MatchRequest
         fields = ("id", "receiver", "created_at")
 
-
+class ChattingRoomListSerializer(ModelSerializer):
+    manager_info = SerializerMethodField('get_manager_info')
+    meeting_info = SerializerMethodField('get_meeting_info')
+    receiver_info = SerializerMethodField('get_receiver_info')
+    sender_info = SerializerMethodField('get_sender_info')
+    def get_manager_info(self, match):
+        return {'id': match.manager.id, 'uid': match.manager.uid, 'nickname': match.manager.nickname}
+    def get_meeting_info(self, match):
+        return {'type': match.sender.meeting_type.name, 'date': match.sender.date}
+    def get_receiver_info(self, match):
+        return {'id': match.receiver.openby.id, 'uid': match.receiver.openby.uid, 'nickname': match.receiver.openby.nickname, 'age': match.receiver.openby.age, 'gender': '남' if match.receiver.openby.gender == 1 else '여', 'belong': match.receiver.openby.belong, 'department':  match.receiver.openby.department }
+    def get_sender_info(self, match):
+        return {'id': match.sender.openby.id, 'uid': match.sender.openby.uid, 'nickname': match.sender.openby.nickname, 'age': match.sender.openby.age, 'gender': '남' if match.sender.openby.gender == 1 else '여', 'belong': match.sender.openby.belong, 'department':  match.sender.openby.department}
+    class Meta:
+        model = MatchRequest
+        fields = ("id", "manager_info", "meeting_info", "receiver_info", "sender_info")
