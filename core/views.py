@@ -806,7 +806,7 @@ class CallManagerView(APIView):
             'user2': match.sender.openby.nickname 
         }
         manager = User.objects.get(id=settings.MANAGER_ID)
-        notification_content = "{}월{}일 {}({}, {}) 매니저 호출이 있습니다".format(meeting_info['date'].month, meeting_info['date'].day, meeting_info['type'], meeting_info['user1'], meeting_info['user2'])
+        notification_content = "{}월 {}일 {}({}, {}) 매니저 호출이 있습니다".format(meeting_info['date'].month, meeting_info['date'].day, meeting_info['type'], meeting_info['user1'], meeting_info['user2'])
         notification_data = ""
         push_data = {
             'title': "야미구",
