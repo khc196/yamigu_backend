@@ -783,8 +783,39 @@ class RecommendationMeetingListView(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 class CallManagerView(APIView):
+    """
+
+        매니저 호출 API
+
+        ---
+        # Request Body Schema
+        - matching_id: 해당 matching id (String)
+    """
+
     permission_class = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
+
+        matching_id = request.data['matching_id']
+        print(matching_id)
+        match = MatchRequest.objects.get(id=matching_id)
+        match.manager_call = True
+        match.save()
+        meeting_info = {
+            'date': match.receiver.date, 
+            'type': match.receiver.meeting_type.name, 
+            'user1': match.receiver.openby.nickname,
+            'user2': match.sender.openby.nickname 
+        }
+        manager = User.objects.get(id=4)
+        notification_content = "{}월{}일 {}({}, {}) 매니저 호출이 있습니다".format(meeting_info['date'].month, meeting_info['date'].day, meeting_info['type'], meeting_info['user1'], meeting_info['user2'])
+        notification_data = ""
+        push_data = {
+            'title': "야미구",
+            'content': notification_content,
+            'clickAction': ".NotificationActivity",
+            'intentArgs': ""
+        }
+        firebase_message.send_push(manager.id, push_data)
         return Response(status=status.HTTP_200_OK)
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
