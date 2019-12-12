@@ -36,6 +36,7 @@ class UserAdmin(admin.ModelAdmin):
     def response_change(self, request, obj):
         if "certificate" in request.POST:
             obj.user_certified = 2
+            obj.ticket = obj.ticket + 1
             obj.save()
             data = {'user': obj.id} 
             res = requests.post("http://106.10.39.154:9999/api/manager/certificate/user/", data=data)
