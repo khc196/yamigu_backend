@@ -258,6 +258,13 @@ class ChangeAvataView(APIView):
             'new_avata': user.image}, 
             status=status.HTTP_200_OK)
 class ImageURLView(APIView):
+    """
+
+        프로필 사진 가져오는 API
+        
+        ---
+        
+    """
     permission_classes = [IsAuthenticated]
     def post(self, request, uid):
         user = User.objects.get(uid=uid)
