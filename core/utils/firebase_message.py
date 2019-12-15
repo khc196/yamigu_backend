@@ -22,6 +22,7 @@ def send_push_thread(user_id, data, is_chat=False):
         if(not device.active):
             continue
         if(device.type == 'android'):
+            data['badge'] = badge
             device.send_message(data=data)
         else:
             device.send_message(data=data, title=data['title'], body=data['content'], badge=badge)
