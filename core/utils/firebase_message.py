@@ -9,11 +9,15 @@ def send_push_thread(user_id, data, is_chat=False):
     user = User.objects.get(id=user_id)
     ref = db.reference('user/{}/notifications'.format(user.uid))
     badge = 0
-    for noti in ref.get().values():
-        if noti['isUnread']:
-            badge = badge + 1
+    ref_dict = ref.get().values()
+    for noti in ref_dict:
+    	try:
+    		if noti['isUnread']:
+    			badge = badge + 1
+    	except TypeError:
+    		pass
     if is_chat:
-        badge = badge + 1
+    	badge = badge + 1
     for device in devices:
         if(not device.active):
             continue
