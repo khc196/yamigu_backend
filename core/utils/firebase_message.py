@@ -33,8 +33,8 @@ def send_notification_thread(uid, notification_type, content, data):
         'time': int(((datetime.now() - datetime(1970, 1, 1)).total_seconds() - 3600 * 9)* 1000)
     })
     
-def send_push(user_id, data):
-    t = threading.Thread(target=send_push_thread, args=(user_id, data))
+def send_push(user_id, data, is_chat=False):
+    t = threading.Thread(target=send_push_thread, args=(user_id, data, is_chat))
     t.start()
 def send_notification(uid, notification_type, content, data):
     t = threading.Thread(target=send_notification_thread, args=(uid, notification_type, content, data))
