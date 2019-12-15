@@ -4,7 +4,7 @@ from datetime import datetime
 from authorization.models import User
 import threading
 
-def send_push_thread(user_id, data):
+def send_push_thread(user_id, data, is_chat=False):
     devices = FCMDevice.objects.filter(user=user_id)
     user = User.objects.get(id=user_id)
     ref = db.reference('user/{}/notifications'.format(user.uid))
@@ -12,6 +12,8 @@ def send_push_thread(user_id, data):
     for noti in ref.get().values():
         if noti['isUnread']:
             badge = badge + 1
+    if is_chat:
+        badge = badge + 1
     for device in devices:
         if(not device.active):
             continue
