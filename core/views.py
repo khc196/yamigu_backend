@@ -380,7 +380,7 @@ class MeetingSendRequestMatchView(APIView):
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
                 'intentArgs': {
-                        'match_id': target_meeting.id
+                        'match_id': match.id
                     },
             }
             firebase_message.send_push(receiver_user_id, push_data)
@@ -456,7 +456,7 @@ class MeetingSendRequestMatchNewView(APIView):
                     'content': notification_content,
                     'clickAction': ".NotificationActivity",
                     'intentArgs': {
-                            'match_id': target_meeting.id
+                            'match_id': match.id
                         },
                     }
                 firebase_message.send_push(receiver_user_id, push_data)
@@ -545,7 +545,7 @@ class MeetingAcceptRequestMatchView(APIView):
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
                 'intentArgs': {
-                        'match_id': target_meeting.id
+                        'match_id': match_request.id
                     },
             }
             sender_user_id = sender.openby.id
@@ -613,7 +613,7 @@ class MeetingDeclineRequestMatchView(APIView):
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
                 'intentArgs': {
-                        'match_id': target_meeting.id
+                        'match_id': match_request.id
                     },
             }
             firebase_message.send_push(sender_user_id, push_data)
@@ -649,7 +649,7 @@ class MeetingCancelMatchView(APIView):
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
                 'intentArgs': {
-                        'match_id': target_meeting.id
+                        'match_id': match_request.id
                     },
             }
             firebase_message.send_push(partner.id, push_data)
