@@ -379,7 +379,8 @@ class MeetingSendRequestMatchView(APIView):
                 'title': "야미구",
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
-                'intentArgs': ""
+                'intentArgs': "",
+                'badge': 1,
             }
             firebase_message.send_push(receiver_user_id, push_data)
             firebase_message.send_notification(receiver_user_uid, 1, notification_content, notification_data)
@@ -453,7 +454,8 @@ class MeetingSendRequestMatchNewView(APIView):
                     'title': "야미구",
                     'content': notification_content,
                     'clickAction': ".NotificationActivity",
-                    'intentArgs': ""
+                    'intentArgs': "",
+                    'badge': 1,
                     }
                 firebase_message.send_push(receiver_user_id, push_data)
                 firebase_message.send_notification(receiver_user_uid, 1, notification_content, notification_data)
@@ -540,7 +542,8 @@ class MeetingAcceptRequestMatchView(APIView):
                 'title': "야미구",
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
-                'intentArgs': ""
+                'intentArgs': "",
+                'badge': 1,
             }
             sender_user_id = sender.openby.id
             sender_user_uid = sender.openby.uid
@@ -606,7 +609,8 @@ class MeetingDeclineRequestMatchView(APIView):
                 'title': "야미구",
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
-                'intentArgs': ""
+                'intentArgs': "",
+                'badge': 1,
             }
             firebase_message.send_push(sender_user_id, push_data)
             firebase_message.send_notification(sender_user_uid, 3, notification_content, notification_data)
@@ -640,7 +644,8 @@ class MeetingCancelMatchView(APIView):
                 'title': "야미구",
                 'content': notification_content,
                 'clickAction': ".NotificationActivity",
-                'intentArgs': ""
+                'intentArgs': "",
+                'badge': 1,
             }
             firebase_message.send_push(partner.id, push_data)
             firebase_message.send_notification(partner.uid, 6, notification_content, notification_data)
@@ -812,7 +817,8 @@ class CallManagerView(APIView):
             'title': "야미구",
             'content': notification_content,
             'clickAction': ".NotificationActivity",
-            'intentArgs': ""
+            'intentArgs': "",
+            'badge': 1,
         }
         firebase_message.send_push(manager.id, push_data)
         return Response(status=status.HTTP_200_OK)
