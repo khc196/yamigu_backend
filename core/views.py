@@ -473,7 +473,7 @@ class MeetingReceivedRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(receiver__id=request.GET.getlist('meeting_id')[0], is_declined=False)
+            queryset = MatchRequest.objects.filter(receiver__id=request.GET.getlist('meeting_id')[0], is_selected=False, is_declined=False)
             serializer = MatchRequestSenderSerializer(queryset, many=True, context={'request': request})
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
@@ -491,7 +491,7 @@ class MeetingSentRequestMatchView(APIView):
     permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0])
+            queryset = MatchRequest.objects.filter(sender__id=request.GET.getlist('meeting_id')[0], is_selected=False, is_declined=False)
             serializer = MatchRequestReceiverSerializer(queryset, many=True, context={'request': request})
            # print(serializer.data)
             return Response(serializer.data)

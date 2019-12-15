@@ -9,7 +9,7 @@ def send_push_thread(user_id, data):
         if(device.type == 'android'):
             device.send_message(data=data)
         else:
-            device.send_message(data=data, title=data['title'], body=data['content'])
+            device.send_message(data=data, title=data['title'], body=data['content'], aps=data['aps'])
 def send_notification_thread(uid, notification_type, content, data):
     ref = db.reference('user/{}/notifications'.format(uid))
     key = ref.push().key
