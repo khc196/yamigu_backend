@@ -16,5 +16,6 @@ api_urlpattern = [
     path('user/change/avata/',  ChangeAvataView.as_view()),
     path('buyticket/', BuyTicketView.as_view()),
     path('user/<uid>/image/', ImageURLView.as_view()),
-    path('manager/certificate/user/', CertificateAdminView.as_view())
+    path('manager/certificate/user/', CertificateAdminView.as_view()),
+    path('auth/withdrawal/', WithdrawalView.as_view())
 ]
