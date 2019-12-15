@@ -10,7 +10,7 @@ def send_push_thread(user_id, data):
     ref = db.reference('user/{}/notifications'.format(user.uid))
     badge = 0
     for noti in ref.get().values():
-        if noti.isUnread:
+        if noti['isUnread']:
             badge = badge + 1
     for device in devices:
         if(not device.active):
