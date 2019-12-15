@@ -244,7 +244,7 @@ class CertificateAdminView(APIView):
             'intentArgs': ""
         }
         firebase_message.send_push(user.id, push_data)
-        firebase_message.send_notification(user.uid, 1, notification_content, notification_data)
+        firebase_message.send_notification(user.uid, 4, notification_content, notification_data)
         return Response(data=None, status=status.HTTP_200_OK)
     
 class ChangeAvataView(APIView):

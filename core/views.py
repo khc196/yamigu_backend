@@ -648,7 +648,7 @@ class MeetingCancelMatchView(APIView):
                 'badge': 1,
             }
             firebase_message.send_push(partner.id, push_data)
-            firebase_message.send_notification(partner.uid, 6, notification_content, notification_data)
+            firebase_message.send_notification(partner.uid, 5, notification_content, notification_data)
             return Response(data=match_id, status=status.HTTP_200_OK)
         except:
             return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
