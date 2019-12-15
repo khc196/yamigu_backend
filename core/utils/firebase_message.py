@@ -6,6 +6,8 @@ import threading
 def send_push_thread(user_id, data):
     devices = FCMDevice.objects.filter(user=user_id)
     for device in devices:
+        if(not device.active):
+            continue
         if(device.type == 'android'):
             device.send_message(data=data)
         else:
