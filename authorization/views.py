@@ -196,6 +196,16 @@ class SignUpView(APIView):
         #user.cert_image = request.data['cert_img']
         user.save()
         return Response(data=None, status=status.HTTP_200_OK)
+class WithdrawalView(APIView):
+    """
+        회원탈퇴 API
+        
+        ---
+    """
+    def post(self, request, *args, **kwargs):
+        user = User.objects.select_related().get(id=request.user.id)
+        user.delete()
+        return Response(data=None, status=status.HTTP_200_OK)
 class KakaoLoginView(SocialLoginView):
     adapter_class = KakaoOAuth2Adapter
 class AppleLoginView(SocialLoginView):
