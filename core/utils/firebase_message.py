@@ -8,15 +8,17 @@ def send_push_thread(user_id, data):
     devices = FCMDevice.objects.filter(user=user_id)
     user = User.objects.get(id=user_id)
     ref = db.reference('user/{}/notifications'.format(user.uid))
-    print(ref.get())
-    badge = 100
+    badge = 0
+    for noti in ref.get().values():
+        if noti.isUnread:
+            badge = badge + 1
     for device in devices:
         if(not device.active):
             continue
         if(device.type == 'android'):
             device.send_message(data=data)
         else:
-            device.send_message(data=data, title=data['title'], body=data['content'], badge=100)
+            device.send_message(data=data, title=data['title'], body=data['content'], badge=badge)
 def send_notification_thread(uid, notification_type, content, data):
     ref = db.reference('user/{}/notifications'.format(uid))
     key = ref.push().key
