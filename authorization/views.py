@@ -223,7 +223,7 @@ class SignUpView(APIView):
                     'intentArgs': ""
                 }
                 firebase_message.send_push(friend.id, push_data)
-                firebase_message.send_notification(user.uid, 6, notification_content, notification_data)
+                firebase_message.send_notification(friend.uid, 6, notification_content, notification_data)
         except:
             pass
         #user.cert_image = request.data['cert_img']
