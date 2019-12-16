@@ -96,7 +96,7 @@ class ChattingRoomListSerializer(ModelSerializer):
     def get_receiver_info(self, match):
         return {'meeting_id': match.receiver.id, 'id': match.receiver.openby.id, 'uid': match.receiver.openby.uid, 'nickname': match.receiver.openby.nickname, 'age': match.receiver.openby.age, 'gender': '남' if match.receiver.openby.gender == 1 else '여', 'belong': match.receiver.openby.belong, 'department':  match.receiver.openby.department }
     def get_sender_info(self, match):
-        return {'meeting_id': match_sender.id, 'id': match.sender.openby.id, 'uid': match.sender.openby.uid, 'nickname': match.sender.openby.nickname, 'age': match.sender.openby.age, 'gender': '남' if match.sender.openby.gender == 1 else '여', 'belong': match.sender.openby.belong, 'department':  match.sender.openby.department}
+        return {'meeting_id': match.sender.id, 'id': match.sender.openby.id, 'uid': match.sender.openby.uid, 'nickname': match.sender.openby.nickname, 'age': match.sender.openby.age, 'gender': '남' if match.sender.openby.gender == 1 else '여', 'belong': match.sender.openby.belong, 'department':  match.sender.openby.department}
     class Meta:
         model = MatchRequest
         fields = ("id", "manager_call", "manager_info", "meeting_info", "receiver_info", "sender_info")
