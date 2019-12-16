@@ -534,6 +534,16 @@ class MeetingAcceptRequestMatchView(APIView):
             sender.save()
             receiver.save()
             match_request.save()
+            match_requests = MatchRequest.objects.all().exclude(id=match_request.id)
+            for match in match_requests:
+                if(match.is_selected):
+                    continue
+                if(match.sender == sender or match.sender == receiver):
+                    match.delete()
+                    continue
+                if(match.receiver == sender or match.receiver == receiver):
+                    match.delete()
+                    continue
             count_meeting = Meeting.objects.all().filter(openby=request.user.id).filter(is_matched=True).count()
             #TODO: Push notification & Firebase DB notification
             month = receiver.date.month
