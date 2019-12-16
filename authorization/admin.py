@@ -14,7 +14,7 @@ class UserAdmin(admin.ModelAdmin):
     ordering = ('-id',)
     
     def gender_string(self, obj):
-        gen_str = '남' if obj.gender == 1 else '여'
+        gen_str = '남' if obj.gender == 1 elif obj.gender == 2 '여' else ''
         return gen_str
     def user_certified_string(self, obj):
         cer_str = '미인증' 

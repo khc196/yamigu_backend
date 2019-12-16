@@ -10,6 +10,17 @@ from firebase_admin import credentials
 from firebase_admin import auth
 from firebase_admin._auth_utils import UidAlreadyExistsError
 import os
+import string
+import random
+
+ 
+def generateInviteCode():
+    _LENGTH = 6
+    string_pool = string.digits + string.ascii_lowercase
+    result = ""
+    for i in range(_LENGTH) :
+        result += random.choice(string_pool) 
+    return result​
 class UserManager(BaseUserManager):
     def create_user(self, name, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not gender:
@@ -96,11 +107,6 @@ class UserManager(BaseUserManager):
        		auth.create_user(uid=user.uid)
        	except UidAlreadyExistsError:
        		pass
-       	except ValueError:
-            try:
-       		    auth.create_user(uid=user.uid)
-            except UidAlreadyExistsError:
-                pass
         user.save(using=self._db)
         return user
 
@@ -136,8 +142,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     token = Token
     firebase_token= models.CharField(max_length=1000, null=True, unique=True)
+    invite_code = models.CharField(max_length=6, null=True, unique=True)
     objects = UserManager()
     USERNAME_FIELD = 'name'
+    
 
     def __str__(self):
         real_name = ''

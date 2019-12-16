@@ -11,7 +11,7 @@ from allauth.socialaccount.providers.kakao.views import KakaoOAuth2Adapter
 from allauth.socialaccount.providers.apple.views import AppleOAuth2Adapter
 from rest_auth.registration.views import SocialLoginView
 from .serializers import UserSerializer
-from .models import User
+from .models import User, generateInviteCode
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
@@ -181,6 +181,7 @@ class SignUpView(APIView):
             - belong: 소속(학교 or 직장)
             - department: 부서(전공 or 팀)
             - age: 나이 
+            - friend_code: 친구 코드 (선택 사항)
         
     """
     def post(self, request, *args, **kwargs):
@@ -193,8 +194,27 @@ class SignUpView(APIView):
         user.belong = request.data['belong']
         user.department = request.data['department']
         user.age = request.data['age']
-        #user.cert_image = request.data['cert_img']
+        invite_code = generateInviteCode()
+        while(True):
+            try: 
+                if(User.objects.filter(invite_code=invite_code).exists()):
+                    invite_code = generateInviteCode()
+                else:
+                    break
+            except User.DoesNotExist:
+                break
+        user.invite_code = invite_code
         user.save()
+        
+        friend_code = request.data['friend_code']
+        if(friend_code):
+            try:
+                friend = User.objects.get(invite_code=friend_code)
+                friend.ticket = friend.ticket + 1
+                friend.save()
+            except:
+                pass
+        #user.cert_image = request.data['cert_img']
         return Response(data=None, status=status.HTTP_200_OK)
 class WithdrawalView(APIView):
     """
