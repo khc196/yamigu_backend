@@ -208,16 +208,13 @@ class SignUpView(APIView):
                 break
         user.invite_code = invite_code
         user.save()
-        print(request.data['friend_code'])
         try:
             friend_code = request.data['friend_code']
-            print(friend_code)
             if(friend_code):
                 friend = User.objects.get(invite_code=friend_code)
                 friend.ticket = friend.ticket + 1
                 friend.save()
                 notification_content = "{}님이 회원님의 초대코드로 가입하여 티켓 한장을 드렸어요!".format(user.nickname)
-                print(notification_content)
                 notification_data = ""
                 push_data = {
                     'title': "야미구",
