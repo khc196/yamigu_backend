@@ -99,4 +99,4 @@ class ChattingRoomListSerializer(ModelSerializer):
         return {'id': match.sender.openby.id, 'uid': match.sender.openby.uid, 'nickname': match.sender.openby.nickname, 'age': match.sender.openby.age, 'gender': '남' if match.sender.openby.gender == 1 else '여', 'belong': match.sender.openby.belong, 'department':  match.sender.openby.department}
     class Meta:
         model = MatchRequest
-        fields = ("id", "manager_info", "meeting_info", "receiver_info", "sender_info")
+        fields = ("id", "manager_call", "manager_info", "meeting_info", "receiver_info", "sender_info")
