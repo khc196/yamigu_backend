@@ -211,6 +211,16 @@ class SignUpView(APIView):
                 friend = User.objects.get(invite_code=friend_code)
                 friend.ticket = friend.ticket + 1
                 friend.save()
+                notification_content = "{}님이 회원님의 초대코드로 가입하여 티켓 한장을 드렸어요!".format(user.nickname)
+                notification_data = ""
+                push_data = {
+                    'title': "야미구",
+                    'content': notification_content,
+                    'clickAction': ".NotificationActivity",
+                    'intentArgs': ""
+                }
+                firebase_message.send_push(friend.id, push_data)
+                firebase_message.send_notification(user.uid, 6, notification_content, notification_data)
         except:
             pass
         #user.cert_image = request.data['cert_img']
