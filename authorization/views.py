@@ -191,8 +191,11 @@ class SignUpView(APIView):
         user.gender = request.data['gender']
         user.phone = request.data['phone']
         user.is_student = True if request.data['is_student'] == 'true' else False
-        user.belong = request.data['belong']
-        user.department = request.data['department']
+        try: 
+            user.belong = request.data['belong']
+            user.department = request.data['department']
+        except:
+            pass
         user.age = request.data['age']
         invite_code = generateInviteCode()
         while(True):
