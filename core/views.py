@@ -661,12 +661,14 @@ class MeetingCancelMatchView(APIView):
 class ChattingRoomListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
-            queryset = MatchRequest.objects.filter(is_selected=True)
+            now = datetime.now()
+            queryset = MatchRequest.objects.filter(is_selected=True, receiver__date__gte=now)
             serializer = ChattingRoomListSerializer(queryset, many=True, context={'request': request})
            # print(serializer.data)
             return Response(serializer.data)
         except Meeting.DoesNotExist as e:
             raise Http404
+
 
 # class RatingView(APIView):
 #     """
