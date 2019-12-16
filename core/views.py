@@ -659,6 +659,7 @@ class MeetingCancelMatchView(APIView):
             return Response(data=match_id, status=status.HTTP_400_BAD_REQUEST)
 
 class ChattingRoomListView(APIView):
+    permission = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
             now = datetime.now()
@@ -669,7 +670,13 @@ class ChattingRoomListView(APIView):
         except Meeting.DoesNotExist as e:
             raise Http404
 
-
+class ManagerEnterRoomView(APIView):
+    permission = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        match = MatchRequest.objects.get(id=request.data['match_id'])
+        match.manager_call = False
+        match.save()
+        return Response(data=None, status=status.HTTP_200_OK)
 # class RatingView(APIView):
 #     """
 #         별점 평가 API

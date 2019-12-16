@@ -25,5 +25,6 @@ api_urlpattern = [
     path('call_manager/', CallManagerView.as_view()),
     path('fcm/register_device/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),
     path('fcm/send_push/', PushNotificationView.as_view()),
-    path('manager/chatting_room_list/', ChattingRoomListView.as_view())
+    path('manager/chatting_room_list/', ChattingRoomListView.as_view()),
+    path('manager/enter_room/', ManagerEnterRoomView.as_view())
 ]
