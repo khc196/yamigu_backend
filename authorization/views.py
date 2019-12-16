@@ -214,7 +214,7 @@ class SignUpView(APIView):
                 friend = User.objects.get(invite_code=friend_code)
                 friend.ticket = friend.ticket + 1
                 friend.save()
-                notification_content = "초대한 친구의 가입으로 티켓 한 장을 드렸어요!"
+                notification_content = "친구의 가입으로 티켓 한 장을 드렸어요!"
                 notification_data = ""
                 push_data = {
                     'title': "야미구",
