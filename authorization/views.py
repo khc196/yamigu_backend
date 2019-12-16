@@ -205,15 +205,14 @@ class SignUpView(APIView):
                 break
         user.invite_code = invite_code
         user.save()
-        
-        friend_code = request.data['friend_code']
-        if(friend_code):
-            try:
+        try:
+            friend_code = request.data['friend_code']
+            if(friend_code):
                 friend = User.objects.get(invite_code=friend_code)
                 friend.ticket = friend.ticket + 1
                 friend.save()
-            except:
-                pass
+        except:
+            pass
         #user.cert_image = request.data['cert_img']
         return Response(data=None, status=status.HTTP_200_OK)
 class WithdrawalView(APIView):
