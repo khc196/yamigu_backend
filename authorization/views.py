@@ -208,6 +208,7 @@ class SignUpView(APIView):
                 break
         user.invite_code = invite_code
         user.save()
+        print(request.data['friend_code'])
         try:
             friend_code = request.data['friend_code']
             print(friend_code)
