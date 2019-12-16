@@ -18,9 +18,10 @@ def generateInviteCode():
     _LENGTH = 6
     string_pool = string.digits + string.ascii_lowercase
     result = ""
-    for i in range(_LENGTH) :
+    for i in range(_LENGTH):
         result += random.choice(string_pool) 
-    return result​
+    return result
+
 class UserManager(BaseUserManager):
     def create_user(self, name, real_name, gender, phone, is_student, belong, department, age, nickname=None, email=None, password=None):
         if not gender:
