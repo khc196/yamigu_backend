@@ -92,7 +92,7 @@ class ChattingRoomListSerializer(ModelSerializer):
     def get_manager_info(self, match):
         return {'id': match.manager.id, 'uid': match.manager.uid, 'nickname': match.manager.nickname}
     def get_meeting_info(self, match):
-        return {'type': match.sender.meeting_type.name, 'date': match.sender.date, 'accepted_at', match.accepted_at}
+        return {'type': match.sender.meeting_type.name, 'date': match.sender.date, 'accepted_at': match.accepted_at}
     def get_receiver_info(self, match):
         return {'id': match.receiver.openby.id, 'uid': match.receiver.openby.uid, 'nickname': match.receiver.openby.nickname, 'age': match.receiver.openby.age, 'gender': '남' if match.receiver.openby.gender == 1 else '여', 'belong': match.receiver.openby.belong, 'department':  match.receiver.openby.department }
     def get_sender_info(self, match):
