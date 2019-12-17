@@ -17,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
         gen_str = '' 
         if obj.gender == 1:
             gen_str = '남'
-        elif obj.gender == 2:
+        elif obj.gender == 0:
             gen_str = '여'
         return gen_str
     def user_certified_string(self, obj):
