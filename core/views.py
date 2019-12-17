@@ -783,7 +783,7 @@ class PushNotificationView(APIView):
             user_obj = User.objects.filter(uid=request.data['receiverId']).values("id")[0]
             user = user_obj["id"]
             
-            if(not user_obj.chat_on):
+            if(not user_obj["chat_on"]):
                 return Response(status=status.HTTP_200_OK)
             devices = FCMDevice.objects.filter(user=user)
             try:
