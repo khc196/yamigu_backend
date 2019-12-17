@@ -780,7 +780,7 @@ class PushNotificationView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         try:
-            user_obj = User.objects.filter(uid=request.data['receiverId']).values("id")[0]
+            user_obj = User.objects.filter(uid=request.data['receiverId']).values()[0]
             user = user_obj["id"]
             
             if(not user_obj["chat_on"]):
