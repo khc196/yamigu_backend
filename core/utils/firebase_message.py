@@ -7,6 +7,8 @@ import threading
 def send_push_thread(user_id, data, is_chat=False):
     devices = FCMDevice.objects.filter(user=user_id)
     user = User.objects.get(id=user_id)
+    if(not user.push_on):
+        return
     ref = db.reference('user/{}/notifications'.format(user.uid))
     badge = 0
     ref_dict = ref.get().values()

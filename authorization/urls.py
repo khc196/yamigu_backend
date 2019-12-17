@@ -17,5 +17,9 @@ api_urlpattern = [
     path('buyticket/', BuyTicketView.as_view()),
     path('user/<uid>/image/', ImageURLView.as_view()),
     path('manager/certificate/user/', CertificateAdminView.as_view()),
-    path('auth/withdrawal/', WithdrawalView.as_view())
+    path('auth/withdrawal/', WithdrawalView.as_view()),
+    path('turn_on/chat/', TurnOnChat.as_view()),
+    path('turn_off/chat/', TurnOffChat.as_view()),
+    path('turn_on/push/', TurnOnPush.as_view()),
+    path('turn_off/push/', TurnOffPush.as_view()),
 ]

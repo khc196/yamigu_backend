@@ -144,6 +144,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     token = Token
     firebase_token= models.CharField(max_length=1000, null=True, unique=True)
     invite_code = models.CharField(max_length=6, null=True, unique=True)
+    push_on = models.BooleanField(default=True)
+    chat_on = models.BooleanField(default=True)
     objects = UserManager()
     USERNAME_FIELD = 'name'
     

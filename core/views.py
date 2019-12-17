@@ -781,6 +781,8 @@ class PushNotificationView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
+            if(not user.chat_on):
+                return Response(status=status.HTTP_200_OK)
             devices = FCMDevice.objects.filter(user=user)
             try:
                 data=json.loads(request.data['data'])

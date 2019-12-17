@@ -348,3 +348,63 @@ class BuyTicketView(APIView):
         user.save()
 
         return Response(data=None, status=status.HTTP_200_OK)
+
+class TurnOnPush(APIView):
+    """
+        푸시 알림 키기 API
+
+        ---
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user.push_on = True
+        user.save()
+
+        return Response(data=None, status=status.HTTP_200_OK)
+
+class TurnOffPush(APIView):
+    """
+        푸시 알림 끄기 API
+
+        ---
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user.push_on = False
+        user.save()
+
+        return Response(data=None, status=status.HTTP_200_OK)
+
+class TurnOnChat(APIView):
+    """
+        채팅 알림 키기 API
+
+        ---
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user.chat_on = True
+        user.save()
+
+        return Response(data=None, status=status.HTTP_200_OK)
+
+class TurnOffChat(APIView):
+    """
+        채팅 알림 끄기 API
+
+        ---
+
+    """
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.id)
+        user.chat_on = False
+        user.save()
+
+        return Response(data=None, status=status.HTTP_200_OK)
