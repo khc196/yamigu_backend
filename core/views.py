@@ -860,6 +860,24 @@ class CallManagerView(APIView):
         }
         firebase_message.send_push(manager.id, push_data)
         return Response(status=status.HTTP_200_OK)
+
+class CheckUpdateAndroidView(APIView):
+    def get(self, request, *args, **kwagrs):
+        latest_version = AndroidVersion.objects.order_by('-created_at')[0]
+
+        return JsonResponse(data={
+                'latest_version': latest_version.code
+            }, 
+            status=status.HTTP_200_OK)
+
+class CheckUpdateIOSView(APIView):
+    def get(self, request, *args, **kwagrs):
+        latest_version = IOSVersion.objects.order_by('-created_at')[0]
+
+        return JsonResponse(data={
+                'latest_version': latest_version.code
+            }, 
+            status=status.HTTP_200_OK)       
 # class MeetingTypeView(APIView):
 #     def get(self, request, *args, **kwargs):
 #         queryset = MeetingType.objects.all()

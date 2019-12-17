@@ -78,3 +78,10 @@ class MatchRequest(models.Model):
     accepted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
+class AndroidVersion(models.Model):
+    code = models.IntegerField(null=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class IOSVersion(models.Model):
+    code = models.IntegerField(null=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
