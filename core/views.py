@@ -780,8 +780,10 @@ class PushNotificationView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         try:
-            user = User.objects.filter(uid=request.data['receiverId']).values("id")[0]["id"]
-            if(not user.chat_on):
+            user_obj = User.objects.filter(uid=request.data['receiverId']).values("id")[0]
+            user = user_obj["id"]
+            
+            if(not user_obj.chat_on):
                 return Response(status=status.HTTP_200_OK)
             devices = FCMDevice.objects.filter(user=user)
             try:
