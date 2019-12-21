@@ -212,7 +212,7 @@ class WaitingMeetingListView(APIView, MyPaginationMixin):
             maximum_age = int(request.GET.get('maximum_age')) if request.GET.get('maximum_age') != None else 11
             #print(request.user.id)
             filtered_data = Meeting.objects.filter(reduce(lambda x, y: x | y, [Q(date=selected_date) for selected_date in selected_dates])).filter(reduce(lambda x, y: x | y, [Q(place_type=selected_place) for selected_place in selected_places])).filter(reduce(lambda x, y: x | y, [Q(meeting_type=selected_type) for selected_type in selected_types])).filter(~Q(openby=request.user.id))
-            if (request.user.id == settings.MANAGER_ID or request.user.id == 120 or request.user.id == 100):
+            if (request.user.id == 5 or request.user.id == 120 or request.user.id == 100):
                 pass
             else:
                 filtered_data = filtered_data.filter(~Q(openby__gender=request.user.gender))

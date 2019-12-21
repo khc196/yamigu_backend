@@ -11,3 +11,4 @@ media/*
 *.p12
 *.pem
 *.p8
+*.log
