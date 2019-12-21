@@ -78,7 +78,8 @@ class MatchRequest(models.Model):
     accepted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
-    	string =  "%d년 %d월 %d일 %s (%s - %s)" % (self.sender.date.year, self.sender.date.month, self.sender.date.day, self.sender.meeting_type.name, self.sender.openby.nickname, self.receiver.openby.nickname)
+        string =  "%d년 %d월 %d일 %s (%s - %s)" % (self.sender.date.year, self.sender.date.month, self.sender.date.day, self.sender.meeting_type.name, self.sender.openby.nickname, self.receiver.openby.nickname)
+        
         return string
 
 
