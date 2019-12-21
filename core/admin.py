@@ -10,7 +10,7 @@ class MatchRequestAdmin(admin.ModelAdmin):
 
 admin.site.register(Meeting, MeetingAdmin)
 admin.site.register(Rating)
-admin.site.register(MatchRequest)
+admin.site.register(MatchRequest, MatchRequestAdmin)
 admin.site.register(AndroidVersion)
 admin.site.register(IOSVersion)
 admin.site.register(MeetingType)
