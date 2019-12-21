@@ -383,8 +383,8 @@ class MeetingSendRequestMatchView(APIView):
             receiver = Meeting.objects.get(pk=data['receiver'])
             receiver_user_id = receiver.openby.id
             receiver_user_uid = receiver.openby.uid
-            user.ticket = user.ticket - 1
-            user.save()
+            #user.ticket = user.ticket - 1
+            #user.save()
             month = prev_meeting[0].date.month
             day = prev_meeting[0].date.day
             notification_content = "{}/{} 미팅 신청이 들어왔어요!".format(month, day)
