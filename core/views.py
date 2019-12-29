@@ -35,6 +35,9 @@ class MeetingCreateView(APIView):
         try:
             date_string = str(datetime.now().year) + " " + date_string 
             date = datetime.strptime(date_string, "%Y %m월 %d일").date()
+            if(datetime.today().month == 12 and date.month == 1):
+                one_year_later = datetime.timedelta(years=1)
+                date = date + one_year_later
             return date
         except:
             raise Http404
