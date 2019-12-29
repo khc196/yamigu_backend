@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from .serializers import *
 from .models import *
 from authorization.models import User
-from datetime import datetime
+from datetime import datetime, timedelta
 from .utils.pagination import MyPaginationMixin
 from fcm_django.models import FCMDevice
 from core.utils import firebase_message
@@ -36,7 +36,7 @@ class MeetingCreateView(APIView):
             date_string = str(datetime.now().year) + " " + date_string 
             date = datetime.strptime(date_string, "%Y %m월 %d일").date()
             if(datetime.today().month == 12 and date.month == 1):
-                one_year_later = datetime.timedelta(years=1)
+                one_year_later = timedelta(days=365)
                 date = date + one_year_later
             return date
         except:
