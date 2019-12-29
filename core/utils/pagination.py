@@ -35,7 +35,7 @@ class MyPaginationMixin(object):
         return self.paginator.get_paginated_response(data)
 
 class MyPageNumberPagination(PageNumberPagination):
-    page_size = 20
+    page_size = 200
 
     def get_paginated_response(self, data):
         return Response(OrderedDict([
